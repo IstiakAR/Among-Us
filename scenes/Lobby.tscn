@@ -1,0 +1,42 @@
+[gd_scene load_steps=4 format=3 uid="uid://boypmurtm7i3j"]
+
+[ext_resource type="Texture2D" uid="uid://dpqd3gl1s55d3" path="res://assets/Stars.png" id="1_0y700"]
+[ext_resource type="Texture2D" uid="uid://iwaov1iogpay" path="res://assets/Lobby.png" id="1_gv8if"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0y700"]
+atlas = ExtResource("1_gv8if")
+region = Rect2(1.0910034, 4.000046, 998.6923, 811.6247)
+
+[node name="Lobby" type="Node2D"]
+
+[node name="ColorRect" type="ColorRect" parent="."]
+offset_right = 1151.0
+offset_bottom = 645.0
+color = Color(0.078431375, 0.078431375, 0.078431375, 1)
+
+[node name="BG1" type="TextureRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 1.0
+offset_top = 2.0
+offset_right = 1150.0
+offset_bottom = 647.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_0y700")
+stretch_mode = 1
+
+[node name="LobbySprite" type="TextureRect" parent="."]
+offset_left = 163.0
+offset_right = 971.0
+offset_bottom = 648.0
+texture = SubResource("AtlasTexture_0y700")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="StaticBody2D" type="StaticBody2D" parent="LobbySprite"]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="LobbySprite/StaticBody2D"]
+position = Vector2(402.93628, 306.47833)
+polygon = PackedVector2Array(179.06372, 83.52167, 176.06372, -79.47833, 66.06372, -122.47833, -67.93628, -123.47833, -178.93628, -78.47833, -179.93628, 85.52167, -159.93628, 111.52167, 154.06372, 114.52167, 84.06372, 282.52167, -159.93628, 301.52167, -531.9363, 42.521667, -421.93628, -244.47833, 214.06372, -266.47833, 429.06372, -17.478333, 499.06372, 156.52167, 156.06372, 113.52167, 187.06372, 161.52167)

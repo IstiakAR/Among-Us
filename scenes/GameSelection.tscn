@@ -1,0 +1,369 @@
+[gd_scene load_steps=28 format=3 uid="uid://ehmuv0pimylr"]
+
+[ext_resource type="Script" uid="uid://b0ro16abjmy1d" path="res://scripts/game_selection.gd" id="1_r2wxx"]
+[ext_resource type="Texture2D" uid="uid://dpqd3gl1s55d3" path="res://assets/Stars.png" id="2_40q6t"]
+[ext_resource type="FontFile" uid="uid://citch8pce4sig" path="res://assets/In your face, joffrey!.ttf" id="3_ag04t"]
+[ext_resource type="Script" uid="uid://3s62qseoae1w" path="res://scripts/crew_container.gd" id="4_lkkww"]
+[ext_resource type="FontFile" uid="uid://btrfdqxm27o00" path="res://assets/VCR_OSD_MONO_1.001.ttf" id="5_m2r7n"]
+[ext_resource type="Script" uid="uid://dm7ajynrogvay" path="res://scripts/imposter_container.gd" id="6_m0io6"]
+[ext_resource type="Texture2D" uid="uid://dkivux77eskgo" path="res://assets/MainMenu.png" id="7_ph4yv"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_08jso"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 5
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="LabelSettings" id="LabelSettings_mrcua"]
+font = ExtResource("3_ag04t")
+font_size = 50
+outline_size = 1
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7gooa"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 5
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_be13v"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_jghl5"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_2ol18"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hj61w"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_jkfqu"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_b5cq2"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_mfgcc"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_1q66i"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_nqr0v"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jghl5"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 5
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3f4qu"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_21a18"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_o1s6q"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_40ht1"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_a6id0"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mrcua"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_color = Color(0.8, 0.8, 0.8, 0)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mrcua"]
+atlas = ExtResource("7_ph4yv")
+region = Rect2(1631.0308, 328.99994, 57, 50.00003)
+
+[node name="GameSelection" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_r2wxx")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.078431375, 0.078431375, 0.078431375, 1)
+
+[node name="BG1" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_40q6t")
+stretch_mode = 1
+
+[node name="create" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 276.0
+offset_top = 109.0
+offset_right = -694.0
+offset_bottom = -466.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_08jso")
+
+[node name="Label" type="Label" parent="create"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 8.0
+offset_right = 178.0
+offset_bottom = 69.0
+text = "Create Game"
+label_settings = SubResource("LabelSettings_mrcua")
+
+[node name="join" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 500.0
+offset_top = 105.0
+offset_right = -475.0
+offset_bottom = -466.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_08jso")
+
+[node name="Label" type="Label" parent="join"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 11.0
+offset_right = 170.0
+offset_bottom = 70.0
+text = "Join Game"
+label_settings = SubResource("LabelSettings_mrcua")
+
+[node name="code" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 718.0
+offset_top = 106.0
+offset_right = -265.0
+offset_bottom = -466.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_08jso")
+
+[node name="Label" type="Label" parent="code"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 9.0
+offset_right = 167.0
+offset_bottom = 67.0
+text = "Enter Code"
+label_settings = SubResource("LabelSettings_mrcua")
+
+[node name="BoxArea" type="Control" parent="."]
+anchors_preset = 0
+offset_left = 257.0
+offset_top = 244.0
+offset_right = 905.0
+offset_bottom = 579.0
+
+[node name="CreatePanel" type="Control" parent="BoxArea"]
+visible = false
+anchors_preset = 0
+offset_right = 654.0
+offset_bottom = 338.0
+
+[node name="WhiteBorder" type="Panel" parent="BoxArea/CreatePanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_7gooa")
+
+[node name="CrewContainer" type="HBoxContainer" parent="BoxArea/CreatePanel"]
+layout_mode = 0
+offset_left = 106.0
+offset_top = 29.0
+offset_right = 570.0
+offset_bottom = 86.0
+theme_override_constants/separation = 10
+alignment = 1
+script = ExtResource("4_lkkww")
+
+[node name="TitleLabel" type="Label" parent="BoxArea/CreatePanel/CrewContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("5_m2r7n")
+theme_override_font_sizes/font_size = 24
+text = "Crew Size:"
+
+[node name="DButton" type="Button" parent="BoxArea/CreatePanel/CrewContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("5_m2r7n")
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxEmpty_be13v")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_jghl5")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_2ol18")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_hj61w")
+text = "-"
+
+[node name="ValueLabel" type="Label" parent="BoxArea/CreatePanel/CrewContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("5_m2r7n")
+theme_override_font_sizes/font_size = 24
+text = "10"
+horizontal_alignment = 1
+
+[node name="IButton" type="Button" parent="BoxArea/CreatePanel/CrewContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("5_m2r7n")
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxEmpty_jkfqu")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_b5cq2")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_mfgcc")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_1q66i")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_nqr0v")
+text = "+"
+
+[node name="ImposterContainer" type="HBoxContainer" parent="BoxArea/CreatePanel"]
+layout_mode = 0
+offset_left = 103.0
+offset_top = 93.0
+offset_right = 567.0
+offset_bottom = 150.0
+theme_override_constants/separation = 18
+alignment = 1
+script = ExtResource("6_m0io6")
+
+[node name="TitleLabel" type="Label" parent="BoxArea/CreatePanel/ImposterContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("5_m2r7n")
+theme_override_font_sizes/font_size = 24
+text = "Imposters:"
+
+[node name="Panel" type="Panel" parent="BoxArea/CreatePanel/ImposterContainer"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_7gooa")
+
+[node name="imp1" type="Label" parent="BoxArea/CreatePanel/ImposterContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("5_m2r7n")
+theme_override_font_sizes/font_size = 24
+text = "1"
+horizontal_alignment = 1
+
+[node name="imp2" type="Label" parent="BoxArea/CreatePanel/ImposterContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("5_m2r7n")
+theme_override_font_sizes/font_size = 24
+text = "2"
+horizontal_alignment = 1
+
+[node name="imp3" type="Label" parent="BoxArea/CreatePanel/ImposterContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("5_m2r7n")
+theme_override_font_sizes/font_size = 24
+text = "3"
+horizontal_alignment = 1
+
+[node name="Panel" type="Panel" parent="BoxArea/CreatePanel"]
+layout_mode = 0
+offset_left = 251.0
+offset_top = 222.0
+offset_right = 405.0
+offset_bottom = 282.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_jghl5")
+
+[node name="CreateButton" type="Button" parent="BoxArea/CreatePanel/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("5_m2r7n")
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxEmpty_3f4qu")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_21a18")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_o1s6q")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_40ht1")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_a6id0")
+text = "Create"
+
+[node name="JoinPanel" type="Control" parent="BoxArea"]
+visible = false
+anchors_preset = 0
+offset_right = 647.0
+offset_bottom = 327.0
+
+[node name="WhiteBorder" type="Panel" parent="BoxArea/JoinPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 7.0
+offset_bottom = 11.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_7gooa")
+
+[node name="CodePanel" type="Control" parent="BoxArea"]
+visible = false
+anchors_preset = 0
+offset_left = 9.0
+offset_top = 33.0
+offset_right = 641.0
+offset_bottom = 105.0
+
+[node name="Panel" type="Panel" parent="BoxArea/CodePanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -85.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_7gooa")
+
+[node name="TextEdit" type="TextEdit" parent="BoxArea/CodePanel/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 11.0
+offset_top = 5.0
+offset_right = -9.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("3_ag04t")
+theme_override_font_sizes/font_size = 55
+theme_override_styles/normal = SubResource("StyleBoxFlat_mrcua")
+selecting_enabled = false
+
+[node name="JoinButton" type="TextureButton" parent="BoxArea/CodePanel"]
+layout_mode = 0
+offset_left = 565.0
+offset_top = 11.0
+offset_right = 622.0
+offset_bottom = 61.0
+texture_normal = SubResource("AtlasTexture_mrcua")

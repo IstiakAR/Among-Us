@@ -1,0 +1,84 @@
+[gd_scene load_steps=9 format=3 uid="uid://b7a18ll5n7om5"]
+
+[ext_resource type="Texture2D" uid="uid://dpqd3gl1s55d3" path="res://assets/Stars.png" id="1_8ln24"]
+[ext_resource type="Texture2D" uid="uid://bfrr61u7knqdr" path="res://assets/title.png" id="2_rtw2f"]
+[ext_resource type="Texture2D" uid="uid://dkivux77eskgo" path="res://assets/MainMenu.png" id="3_oa1go"]
+[ext_resource type="Script" uid="uid://b2p8esga50kt" path="res://scripts/online.gd" id="4_tbmy8"]
+[ext_resource type="Script" uid="uid://blrqscxfqyb7f" path="res://scripts/local.gd" id="5_jk1qb"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_glbon"]
+atlas = ExtResource("2_rtw2f")
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nlkkf"]
+atlas = ExtResource("3_oa1go")
+region = Rect2(843.58276, 344.13806, 190.80164, 76.973785)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qe12f"]
+atlas = ExtResource("3_oa1go")
+region = Rect2(1228.0547, 248.18921, 188.93542, 76.973724)
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.078431375, 0.078431375, 0.078431375, 1)
+
+[node name="BG1" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_8ln24")
+stretch_mode = 1
+
+[node name="Label" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 410.0
+offset_top = 14.0
+offset_right = -402.0
+offset_bottom = -415.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_neighbor_bottom = NodePath("../VBoxContainer")
+texture = SubResource("AtlasTexture_glbon")
+expand_mode = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 495.0
+offset_top = 240.0
+offset_right = -466.0
+offset_bottom = -226.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 15
+alignment = 1
+
+[node name="Online" type="TextureButton" parent="VBoxContainer"]
+layout_mode = 2
+texture_normal = SubResource("AtlasTexture_nlkkf")
+script = ExtResource("4_tbmy8")
+
+[node name="Local" type="TextureButton" parent="VBoxContainer"]
+layout_mode = 2
+texture_normal = SubResource("AtlasTexture_qe12f")
+script = ExtResource("5_jk1qb")
