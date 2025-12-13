@@ -1,0 +1,93 @@
+[gd_scene load_steps=7 format=3 uid="uid://g0ip54a3pf0j"]
+
+[ext_resource type="Texture2D" uid="uid://dlblxq1g72dih" path="res://assets/Map.png" id="1_e7ka0"]
+[ext_resource type="Texture2D" uid="uid://dpqd3gl1s55d3" path="res://assets/Stars.png" id="1_fcw3y"]
+[ext_resource type="PackedScene" uid="uid://ccneigd4fmki7" path="res://scenes/Player.tscn" id="3_nbsk6"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fcw3y"]
+atlas = ExtResource("1_e7ka0")
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_fcw3y"]
+radius = 91.0
+height = 242.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fcw3y"]
+size = Vector2(97, 65.25)
+
+[node name="MainGame" type="Node2D"]
+
+[node name="ColorRect" type="ColorRect" parent="."]
+offset_right = 3666.0
+offset_bottom = 2188.0
+color = Color(0.078431375, 0.078431375, 0.078431375, 1)
+
+[node name="BG1" type="TextureRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 1.0
+offset_top = 2.0
+offset_right = 3792.0
+offset_bottom = 2173.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_fcw3y")
+stretch_mode = 1
+
+[node name="Map" type="TextureRect" parent="."]
+offset_right = 3587.0
+offset_bottom = 2064.0
+texture = SubResource("AtlasTexture_fcw3y")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="Map"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Map/StaticBody2D"]
+position = Vector2(1914, 504)
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_fcw3y")
+
+[node name="CollisionShape2D3" type="CollisionShape2D" parent="Map/StaticBody2D"]
+position = Vector2(1704, 713)
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_fcw3y")
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="Map/StaticBody2D"]
+position = Vector2(2115, 714)
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_fcw3y")
+
+[node name="CollisionShape2D4" type="CollisionShape2D" parent="Map/StaticBody2D"]
+position = Vector2(1705, 282)
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_fcw3y")
+
+[node name="CollisionShape2D5" type="CollisionShape2D" parent="Map/StaticBody2D"]
+position = Vector2(2118, 278)
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_fcw3y")
+
+[node name="CollisionShape2D7" type="CollisionShape2D" parent="Map/StaticBody2D"]
+position = Vector2(1097.5, 712.625)
+shape = SubResource("RectangleShape2D_fcw3y")
+debug_color = Color(0.8463229, 0.34603623, 0.4050455, 0.41960785)
+
+[node name="CollisionShape2D8" type="CollisionShape2D" parent="Map/StaticBody2D"]
+position = Vector2(1351, 712)
+shape = SubResource("RectangleShape2D_fcw3y")
+debug_color = Color(0.8463229, 0.34603623, 0.4050455, 0.41960785)
+
+[node name="CollisionShape2D9" type="CollisionShape2D" parent="Map/StaticBody2D"]
+position = Vector2(1096, 822)
+shape = SubResource("RectangleShape2D_fcw3y")
+debug_color = Color(0.8463229, 0.34603623, 0.4050455, 0.41960785)
+
+[node name="CollisionShape2D10" type="CollisionShape2D" parent="Map/StaticBody2D"]
+position = Vector2(1351, 821)
+shape = SubResource("RectangleShape2D_fcw3y")
+debug_color = Color(0.8463229, 0.34603623, 0.4050455, 0.41960785)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Map/StaticBody2D"]
+polygon = PackedVector2Array(1470, 236, 1634, 74, 2159, 74, 2399, 314, 2398, 438, 2576, 439, 2577, 431, 2633, 431, 2639, 396, 2668, 351, 2677, 342, 2678, 259, 2776, 258, 2876, 355, 2952, 430, 2959, 439, 2876, 438, 2870, 471, 2847, 516, 2839, 521, 2841, 651, 2841, 826, 3032, 823, 3033, 939, 3283, 934, 3292, 818, 3445, 815, 3576, 922, 3581, 1026, 3449, 1141, 3293, 1141, 3287, 1030, 3046, 1024, 3046, 1173, 2844, 1172, 2843, 1453, 2956, 1457, 2956, 1504, 2956, 1488, 2837, 1490, 2834, 1528, 2864, 1570, 2871, 1604, 2872, 1643, 2860, 1681, 2839, 1709, 2840, 1765, 2777, 1829, 2576, 1830, 2574, 1667, 2484, 1666, 2484, 1729, 2534, 1729, 2480, 1737, 2479, 1794, 2528, 1795, 2529, 1967, 2448, 2049, 2199, 2048, 2111, 1968, 2111, 1738, 2344, 1736, 2345, 1667, 2072, 1665, 2068, 2047, 1742, 2047, 1681, 2000, 1558, 1875, 1559, 1855, 909, 1855, 909, 1624, 743, 1624, 743, 1752, 451, 1758, 340, 1674, 340, 1648, 345, 1632, 343, 1316, 493, 1312, 494, 1096, 378, 1096, 378, 1201, 243, 1201, 243, 1340, 147, 1340, 9, 1242, 9, 760, 151, 661, 243, 661, 241, 794, 372, 792, 378, 985, 500, 980, 500, 708, 337, 706, 344, 354, 440, 271, 730, 269, 740, 367, 1456, 372, 1468, 352, 1468, 241, 991, 89, 125, 96, -90, 727, -114, 1116, 128, 2057, 1386, 2368, 3672, 1961, 4279, 836, 3361, 125, 2555, -326, 1415, -230)
+
+[node name="Player" parent="." instance=ExtResource("3_nbsk6")]
+position = Vector2(1811, 631)
