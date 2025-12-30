@@ -3,7 +3,10 @@ extends CharacterBody2D
 @export var speed := 200
 @onready var sprite := $AnimatedSprite2D
 
-func _physics_process(delta):
+func _ready():
+	PlayerRef.player_instance = self
+
+func _physics_process(_delta):
 	var input_vector = Vector2.ZERO
 
 	# Input
@@ -27,3 +30,15 @@ func _physics_process(delta):
 		sprite.flip_h = input_vector.x < 0   # Flip sprite left/right
 	else:
 		sprite.play("stand")
+		
+
+var current_task_area = null
+
+func _input(event: InputEvent) -> void:
+	# Interact action
+	if event.is_action_pressed("interact") and current_task_area:
+		TaskManager.start_task(current_task_area.task_id)
+
+	# Press L key to start "download" task
+	if event is InputEventKey and event.pressed and event.keycode == KEY_L:
+		TaskManager.start_task("download")

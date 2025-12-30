@@ -65,16 +65,14 @@ script = ExtResource("1_v6fml")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 material = SubResource("ShaderMaterial_mdl7e")
-position = Vector2(103.625, 96.25)
+position = Vector2(-0.62501526, 1.75)
 scale = Vector2(0.3945783, 0.38671872)
 sprite_frames = SubResource("SpriteFrames_khinc")
 animation = &"walk"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(105, 106.5)
+position = Vector2(0.75, 12)
 shape = SubResource("RectangleShape2D_mdl7e")
 
 [node name="Camera2D" type="Camera2D" parent="."]
-zoom = Vector2(0.5, 0.5)
-limit_left = 0
-limit_top = 0
+zoom = Vector2(1.75, 1.75)

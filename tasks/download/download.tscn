@@ -1,0 +1,43 @@
+[gd_scene load_steps=4 format=3 uid="uid://cmsjliko6b837"]
+
+[ext_resource type="Script" uid="uid://cw1dsvdqkb6e4" path="res://tasks/download/download.gd" id="1_adxfr"]
+[ext_resource type="Texture2D" uid="uid://cncqpxvcot8vx" path="res://assets/DownloadTask.png" id="2_skiux"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fny0f"]
+atlas = ExtResource("2_skiux")
+
+[node name="download" type="Control"]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_adxfr")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = -325.0
+offset_top = -260.0
+offset_right = 319.0
+offset_bottom = 248.0
+texture = SubResource("AtlasTexture_fny0f")
+
+[node name="ProgressBar" type="ProgressBar" parent="."]
+layout_mode = 0
+offset_left = -190.0
+offset_top = 10.0
+offset_right = 69.0
+offset_bottom = 85.0
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_left = -168.0
+offset_top = -97.0
+offset_right = 74.0
+offset_bottom = -36.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 30
+text = "Downloading..."
