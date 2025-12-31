@@ -39,6 +39,10 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("interact") and current_task_area:
 		TaskManager.start_task(current_task_area.task_id)
 
-	# Press L key to start "download" task
 	if event is InputEventKey and event.pressed and event.keycode == KEY_L:
 		TaskManager.start_task("download")
+	if event is InputEventKey and event.pressed and event.keycode == KEY_K:
+		TaskManager.start_task("keypad")
+	if event is InputEventKey and event.pressed and event.keycode == KEY_C:
+		TaskManager.start_task("circuit_match")
+		

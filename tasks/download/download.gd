@@ -8,9 +8,6 @@ const DOWNLOAD_TIME := 3.0
 var elapsed := 0.0
 var downloading := false
 
-func _ready() -> void:
-	visible = false   # TaskUI will call start_task()
-
 func start_task() -> void:
 	visible = true
 	elapsed = 0.0

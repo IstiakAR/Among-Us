@@ -1,6 +1,9 @@
 extends Control
 
 @onready var download_task: Control = $download
+@onready var keypad_task: Control = $keypad
+@onready var dimbg: Control = $DimBG
+@onready var circuit_match_task: Control = $CircuitMatch
 # @onready var wires_task: Control = $WiresTask
 
 var active_task: Control = null
@@ -24,29 +27,37 @@ func _align_to_camera() -> void:
 
 func _hide_all_tasks() -> void:
 	download_task.visible = false
+	keypad_task.visible = false
 	# wires_task.visible = false
 
 func open_task(task_id: String) -> void:
 	_hide_all_tasks()
 	active_task = null
+	print(task_id)
 
 	match task_id:
 		"download":
 			active_task = download_task
+		"keypad":
+			active_task = keypad_task
+		"circuit_match":
+			active_task = circuit_match_task	
 		# "wires":
 		#     active_task = wires_task
 		_:
 			push_error("TaskUI: Unknown task '%s'" % task_id)
 			return
+	print(active_task)
 
 	visible = true
-
+	dimbg.visible = true
 	if active_task.has_method("start_task"):
 		active_task.start_task()
-	else:
-		active_task.visible = true
+		print("Started task:", active_task.name)
+
 
 func close_task() -> void:
 	_hide_all_tasks()
 	active_task = null
 	visible = false
+	dimbg.visible = false

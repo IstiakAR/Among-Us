@@ -1,0 +1,59 @@
+[gd_scene load_steps=5 format=3 uid="uid://cpq2n7wtdo3in"]
+
+[ext_resource type="Texture2D" uid="uid://wla8t4bblx1u" path="res://assets/KeypadGame.png" id="1_8dkbl"]
+[ext_resource type="Script" uid="uid://bcrgvnegv1mke" path="res://tasks/keypad/keypad.gd" id="1_pd5r7"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8dkbl"]
+atlas = ExtResource("1_8dkbl")
+region = Rect2(0, 0, 376, 503.846)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pd5r7"]
+atlas = ExtResource("1_8dkbl")
+region = Rect2(0, 507.219, 254, 176.625)
+
+[node name="keypad" type="Control"]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_pd5r7")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = -199.0
+offset_top = -260.0
+offset_right = 197.0
+offset_bottom = 248.0
+texture = SubResource("AtlasTexture_8dkbl")
+
+[node name="TextureRect2" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 151.0
+offset_top = -306.0
+offset_right = 405.0
+offset_bottom = -130.0
+texture = SubResource("AtlasTexture_pd5r7")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_left = -123.0
+offset_top = -211.0
+offset_right = 53.0
+offset_bottom = -165.0
+theme_override_font_sizes/font_size = 30
+text = "2342432"
+
+[node name="Label2" type="Label" parent="."]
+layout_mode = 0
+offset_left = 206.0
+offset_top = -226.0
+offset_right = 340.0
+offset_bottom = -171.0
+rotation = -0.429351
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 26
+text = "3452"

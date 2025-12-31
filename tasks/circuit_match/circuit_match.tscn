@@ -1,0 +1,39 @@
+[gd_scene load_steps=6 format=3 uid="uid://c742duasnhyfs"]
+
+[ext_resource type="Script" uid="uid://dqbcwdss5xu7c" path="res://tasks/circuit_match/circuit_match.gd" id="1_4p3ct"]
+[ext_resource type="Texture2D" uid="uid://vo11043bndj" path="res://assets/electric circuit.png" id="1_uegci"]
+[ext_resource type="Texture2D" uid="uid://dpl7vpx58ps67" path="res://assets/electric switch.png" id="2_4p3ct"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c27gh"]
+atlas = ExtResource("1_uegci")
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_owpg0"]
+atlas = ExtResource("2_4p3ct")
+
+[node name="CircuitMatch" type="Control"]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_4p3ct")
+
+[node name="circuit board" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = -334.0
+offset_top = -200.0
+offset_right = 324.0
+offset_bottom = 199.0
+texture = SubResource("AtlasTexture_c27gh")
+
+[node name="switch" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = -21.0
+offset_top = -30.0
+offset_right = 11.883484
+offset_bottom = 28.0
+pivot_offset = Vector2(16, 29)
+texture = SubResource("AtlasTexture_owpg0")

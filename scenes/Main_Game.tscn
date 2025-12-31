@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://g0ip54a3pf0j"]
+[gd_scene load_steps=13 format=3 uid="uid://g0ip54a3pf0j"]
 
 [ext_resource type="Script" uid="uid://pw1a3ljh8agu" path="res://scripts/main_game.gd" id="1_7h5k3"]
 [ext_resource type="Texture2D" uid="uid://dlblxq1g72dih" path="res://assets/Map.png" id="1_e7ka0"]
@@ -6,7 +6,9 @@
 [ext_resource type="PackedScene" uid="uid://ccneigd4fmki7" path="res://scenes/Player.tscn" id="3_nbsk6"]
 [ext_resource type="Script" uid="uid://c7ou4tqcg1xag" path="res://scripts/task_manager.gd" id="4_kvlix"]
 [ext_resource type="Script" uid="uid://dngftttixblb4" path="res://scripts/task_ui.gd" id="5_7h5k3"]
-[ext_resource type="PackedScene" uid="uid://cmsjliko6b837" path="res://tasks/download/download.tscn" id="7_3v32i"]
+[ext_resource type="PackedScene" uid="uid://cpq2n7wtdo3in" path="res://tasks/keypad/keypad.tscn" id="7_3v32i"]
+[ext_resource type="PackedScene" uid="uid://cmsjliko6b837" path="res://tasks/download/download.tscn" id="8_3v32i"]
+[ext_resource type="PackedScene" uid="uid://c742duasnhyfs" path="res://tasks/circuit_match/circuit_match.tscn" id="9_qmn38"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_fcw3y"]
 atlas = ExtResource("1_e7ka0")
@@ -132,6 +134,14 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.36862746)
 
-[node name="download" parent="UI/TaskUI" instance=ExtResource("7_3v32i")]
+[node name="download" parent="UI/TaskUI" instance=ExtResource("8_3v32i")]
+visible = false
+layout_mode = 1
+
+[node name="keypad" parent="UI/TaskUI" instance=ExtResource("7_3v32i")]
+visible = false
+layout_mode = 1
+
+[node name="CircuitMatch" parent="UI/TaskUI" instance=ExtResource("9_qmn38")]
 visible = false
 layout_mode = 1
