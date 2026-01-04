@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=3 uid="uid://ehmuv0pimylr"]
+[gd_scene load_steps=32 format=3 uid="uid://ehmuv0pimylr"]
 
 [ext_resource type="Script" uid="uid://b0ro16abjmy1d" path="res://scripts/game_selection.gd" id="1_r2wxx"]
 [ext_resource type="Texture2D" uid="uid://dpqd3gl1s55d3" path="res://assets/Stars.png" id="2_40q6t"]
@@ -7,6 +7,8 @@
 [ext_resource type="FontFile" uid="uid://btrfdqxm27o00" path="res://assets/VCR_OSD_MONO_1.001.ttf" id="5_m2r7n"]
 [ext_resource type="Script" uid="uid://dm7ajynrogvay" path="res://scripts/imposter_container.gd" id="6_m0io6"]
 [ext_resource type="Texture2D" uid="uid://dkivux77eskgo" path="res://assets/MainMenu.png" id="7_ph4yv"]
+[ext_resource type="Script" uid="uid://3t0xycin3mmy" path="res://scripts/refresh_button.gd" id="8_40q6t"]
+[ext_resource type="Script" uid="uid://cfptkc5tk8dai" path="res://scripts/back_button.gd" id="9_ag04t"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_08jso"]
 bg_color = Color(0.6, 0.6, 0.6, 0)
@@ -74,6 +76,10 @@ corner_radius_bottom_left = 10
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_a6id0"]
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_r2wxx"]
+atlas = ExtResource("7_ph4yv")
+region = Rect2(1589.402, 126.5, 64, 64)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mrcua"]
 bg_color = Color(0.6, 0.6, 0.6, 0)
 border_color = Color(0.8, 0.8, 0.8, 0)
@@ -81,6 +87,10 @@ border_color = Color(0.8, 0.8, 0.8, 0)
 [sub_resource type="AtlasTexture" id="AtlasTexture_mrcua"]
 atlas = ExtResource("7_ph4yv")
 region = Rect2(1631.0308, 328.99994, 57, 50.00003)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ag04t"]
+atlas = ExtResource("7_ph4yv")
+region = Rect2(1632.279, 329.5, 57, 50)
 
 [node name="GameSelection" type="Control"]
 layout_mode = 3
@@ -326,6 +336,30 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_7gooa")
 
+[node name="RefreshButton" type="TextureRect" parent="BoxArea/JoinPanel"]
+layout_mode = 0
+offset_left = 661.0
+offset_top = -3.0
+offset_right = 725.0
+offset_bottom = 61.0
+pivot_offset = Vector2(32, 32)
+texture = SubResource("AtlasTexture_r2wxx")
+script = ExtResource("8_40q6t")
+
+[node name="HostList" type="ItemList" parent="BoxArea/JoinPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 28.0
+offset_top = 30.0
+offset_right = -28.0
+offset_bottom = -30.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("5_m2r7n")
+theme_override_font_sizes/font_size = 22
+
 [node name="CodePanel" type="Control" parent="BoxArea"]
 visible = false
 anchors_preset = 0
@@ -367,3 +401,13 @@ offset_top = 11.0
 offset_right = 622.0
 offset_bottom = 61.0
 texture_normal = SubResource("AtlasTexture_mrcua")
+
+[node name="BackButton" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 94.0
+offset_top = 603.0
+offset_right = 151.0
+offset_bottom = 653.0
+rotation = 3.1415927
+texture_normal = SubResource("AtlasTexture_ag04t")
+script = ExtResource("9_ag04t")

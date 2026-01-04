@@ -1,0 +1,177 @@
+[gd_scene load_steps=6 format=3 uid="uid://doq3hplkf7ju0"]
+
+[ext_resource type="Texture2D" uid="uid://dpqd3gl1s55d3" path="res://assets/Stars.png" id="1_niue5"]
+[ext_resource type="Script" uid="uid://d3atu2su34auj" path="res://scripts/user_settings.gd" id="2_user_settings"]
+[ext_resource type="Texture2D" uid="uid://dkivux77eskgo" path="res://assets/MainMenu.png" id="3_h23cq"]
+[ext_resource type="Script" uid="uid://cfptkc5tk8dai" path="res://scripts/back_button.gd" id="4_ccwbn"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ccwbn"]
+atlas = ExtResource("3_h23cq")
+region = Rect2(1632.279, 329.5, 57, 50)
+
+[node name="UserSettings" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2_user_settings")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.078431375, 0.078431375, 0.078431375, 1)
+
+[node name="BG1" type="TextureRect" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -254.0
+offset_top = -112.0
+offset_right = 334.0
+offset_bottom = 80.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_niue5")
+stretch_mode = 1
+
+[node name="LineEdit" type="LineEdit" parent="."]
+layout_mode = 0
+offset_left = 395.0
+offset_top = 77.0
+offset_right = 810.0
+offset_bottom = 180.0
+theme_override_font_sizes/font_size = 40
+text = "Player"
+alignment = 1
+
+[node name="ColorGrid" type="GridContainer" parent="."]
+layout_mode = 0
+offset_left = 336.0
+offset_top = 237.0
+offset_right = 917.0
+offset_bottom = 552.0
+theme_override_constants/h_separation = 24
+theme_override_constants/v_separation = 24
+columns = 4
+
+[node name="Red" type="ColorRect" parent="ColorGrid"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(1, 0, 0, 1)
+
+[node name="Orange" type="ColorRect" parent="ColorGrid"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(1, 0.60784316, 0, 1)
+
+[node name="Yellow" type="ColorRect" parent="ColorGrid"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(1, 1, 0, 1)
+
+[node name="Banana" type="ColorRect" parent="ColorGrid"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(1, 1, 0.5882353, 1)
+
+[node name="Lime" type="ColorRect" parent="ColorGrid"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.19607843, 0.8039216, 0.19607843, 1)
+
+[node name="Green" type="ColorRect" parent="ColorGrid"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0, 0.3254902, 0, 1)
+
+[node name="Cyan" type="ColorRect" parent="ColorGrid"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0, 1, 1, 1)
+
+[node name="Blue" type="ColorRect" parent="ColorGrid"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0, 0, 1, 1)
+
+[node name="Purple" type="ColorRect" parent="ColorGrid"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.5019608, 0, 0.5019608, 1)
+
+[node name="Tan" type="ColorRect" parent="ColorGrid"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.8235294, 0.7058824, 0.54901963, 1)
+
+[node name="Brown" type="ColorRect" parent="ColorGrid"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.54509807, 0.27058825, 0.07450981, 1)
+
+[node name="Rose" type="ColorRect" parent="ColorGrid"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(1, 0, 0.49803922, 1)
+
+[node name="Pink" type="ColorRect" parent="ColorGrid"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(1, 0.7529412, 0.79607844, 1)
+
+[node name="White" type="ColorRect" parent="ColorGrid"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Black" type="ColorRect" parent="ColorGrid"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+color = Color(0.16206557, 0.1620656, 0.16206557, 1)
+
+[node name="BackButton" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 94.0
+offset_top = 603.0
+offset_right = 151.0
+offset_bottom = 653.0
+rotation = 3.1415927
+texture_normal = SubResource("AtlasTexture_ccwbn")
+script = ExtResource("4_ccwbn")

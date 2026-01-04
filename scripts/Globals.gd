@@ -1,9 +1,8 @@
 extends Node
 
-
-# Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	pass # Replace with function body.
-
+	pass
 
 var playing_online = 0
+var player_name: String = "Player"
+var player_color: Color = Color.WHITE

@@ -11,6 +11,9 @@ var active_task: Control = null
 func _ready() -> void:
 	visible = false
 	_hide_all_tasks()
+	# Register with the TaskManager autoload (avoids hard-coded scene paths).
+	if Engine.is_editor_hint() == false:
+		TaskManager.set_task_ui(self)
 
 func _process(_delta: float) -> void:
 	_align_to_camera()

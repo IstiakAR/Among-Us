@@ -20,10 +20,12 @@ config/icon="res://assets/icon.svg"
 Globals="*res://scripts/Globals.gd"
 TaskManager="*res://scripts/task_manager.gd"
 PlayerRef="*res://scripts/PlayerRef.gd"
+Net="*res://network/NetworkManager.gd"
 
 [display]
 
 window/size/mode=2
+window/stretch/mode="canvas_items"
 
 [input]
 

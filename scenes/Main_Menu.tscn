@@ -1,10 +1,11 @@
-[gd_scene load_steps=9 format=3 uid="uid://b7a18ll5n7om5"]
+[gd_scene load_steps=11 format=3 uid="uid://b7a18ll5n7om5"]
 
 [ext_resource type="Texture2D" uid="uid://dpqd3gl1s55d3" path="res://assets/Stars.png" id="1_8ln24"]
 [ext_resource type="Texture2D" uid="uid://bfrr61u7knqdr" path="res://assets/title.png" id="2_rtw2f"]
 [ext_resource type="Texture2D" uid="uid://dkivux77eskgo" path="res://assets/MainMenu.png" id="3_oa1go"]
 [ext_resource type="Script" uid="uid://b2p8esga50kt" path="res://scripts/online.gd" id="4_tbmy8"]
 [ext_resource type="Script" uid="uid://blrqscxfqyb7f" path="res://scripts/local.gd" id="5_jk1qb"]
+[ext_resource type="Script" uid="uid://l2x5or4ndm4x" path="res://scripts/settings_button.gd" id="6_ytedg"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_glbon"]
 atlas = ExtResource("2_rtw2f")
@@ -16,6 +17,10 @@ region = Rect2(843.58276, 344.13806, 190.80164, 76.973785)
 [sub_resource type="AtlasTexture" id="AtlasTexture_qe12f"]
 atlas = ExtResource("3_oa1go")
 region = Rect2(1228.0547, 248.18921, 188.93542, 76.973724)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_h8c6n"]
+atlas = ExtResource("3_oa1go")
+region = Rect2(1569.8085, 57.94347, 65.83276, 65.35402)
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -46,13 +51,13 @@ stretch_mode = 1
 
 [node name="Label" type="TextureRect" parent="."]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 410.0
-offset_top = 14.0
-offset_right = -402.0
-offset_bottom = -415.0
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -220.0
+offset_top = 20.0
+offset_right = 220.0
+offset_bottom = 240.0
 grow_horizontal = 2
 grow_vertical = 2
 focus_neighbor_bottom = NodePath("../VBoxContainer")
@@ -61,13 +66,13 @@ expand_mode = 1
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 495.0
-offset_top = 240.0
-offset_right = -466.0
-offset_bottom = -226.0
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -110.0
+offset_top = 270.0
+offset_right = 110.0
+offset_bottom = 420.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 15
@@ -82,3 +87,12 @@ script = ExtResource("4_tbmy8")
 layout_mode = 2
 texture_normal = SubResource("AtlasTexture_qe12f")
 script = ExtResource("5_jk1qb")
+
+[node name="SettingsButton" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 33.0
+offset_top = 546.0
+offset_right = 98.0
+offset_bottom = 611.0
+texture_normal = SubResource("AtlasTexture_h8c6n")
+script = ExtResource("6_ytedg")
