@@ -14,23 +14,28 @@ func _ready() -> void:
 	# Register with the TaskManager autoload (avoids hard-coded scene paths).
 	if Engine.is_editor_hint() == false:
 		TaskManager.set_task_ui(self)
+	# Ensure TaskUI and background dim don't block clicks on tasks.
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if dimbg != null:
+		dimbg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# Draw TaskUI above other HUD elements for both visuals and picking.
+	z_index = 100
 
 func _process(_delta: float) -> void:
 	_align_to_camera()
 	
 func _align_to_camera() -> void:
-	var cam := get_viewport().get_camera_2d()
-	if cam == null:
-		return
+	# UI is under a CanvasLayer; it already ignores camera transforms.
+	# Just ensure it fills the viewport.
 	var viewport_size: Vector2 = get_viewport_rect().size
-	var top_left: Vector2 = cam.global_position - viewport_size * 0.5
-	global_position = top_left
+	global_position = Vector2.ZERO
 	size = viewport_size
 
 
 func _hide_all_tasks() -> void:
 	download_task.visible = false
 	keypad_task.visible = false
+	circuit_match_task.visible = false
 	# wires_task.visible = false
 
 func open_task(task_id: String) -> void:
@@ -54,6 +59,9 @@ func open_task(task_id: String) -> void:
 
 	visible = true
 	dimbg.visible = true
+	if active_task != null:
+		active_task.z_index = 1
+		active_task.visible = true
 	if active_task.has_method("start_task"):
 		active_task.start_task()
 		print("Started task:", active_task.name)

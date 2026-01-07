@@ -1,4 +1,4 @@
-[gd_scene load_steps=32 format=3 uid="uid://ehmuv0pimylr"]
+[gd_scene load_steps=35 format=3 uid="uid://ehmuv0pimylr"]
 
 [ext_resource type="Script" uid="uid://b0ro16abjmy1d" path="res://scripts/game_selection.gd" id="1_r2wxx"]
 [ext_resource type="Texture2D" uid="uid://dpqd3gl1s55d3" path="res://assets/Stars.png" id="2_40q6t"]
@@ -9,6 +9,8 @@
 [ext_resource type="Texture2D" uid="uid://dkivux77eskgo" path="res://assets/MainMenu.png" id="7_ph4yv"]
 [ext_resource type="Script" uid="uid://3t0xycin3mmy" path="res://scripts/refresh_button.gd" id="8_40q6t"]
 [ext_resource type="Script" uid="uid://cfptkc5tk8dai" path="res://scripts/back_button.gd" id="9_ag04t"]
+[ext_resource type="Script" uid="uid://rqqd5cyj3idl" path="res://scripts/region_selector.gd" id="10_lkkww"]
+[ext_resource type="Script" uid="uid://bcfc3h8jp1fyn" path="res://scripts/label.gd" id="11_m2r7n"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_08jso"]
 bg_color = Color(0.6, 0.6, 0.6, 0)
@@ -91,6 +93,10 @@ region = Rect2(1631.0308, 328.99994, 57, 50.00003)
 [sub_resource type="AtlasTexture" id="AtlasTexture_ag04t"]
 atlas = ExtResource("7_ph4yv")
 region = Rect2(1632.279, 329.5, 57, 50)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lkkww"]
+atlas = ExtResource("7_ph4yv")
+region = Rect2(1612.5281, 231.57567, 64.28894, 64.85347)
 
 [node name="GameSelection" type="Control"]
 layout_mode = 3
@@ -411,3 +417,21 @@ offset_bottom = 653.0
 rotation = 3.1415927
 texture_normal = SubResource("AtlasTexture_ag04t")
 script = ExtResource("9_ag04t")
+
+[node name="RegionSelector" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 1075.0
+offset_top = 574.0
+offset_right = 1139.0
+offset_bottom = 638.0
+texture = SubResource("AtlasTexture_lkkww")
+script = ExtResource("10_lkkww")
+
+[node name="Label" type="Label" parent="RegionSelector"]
+layout_mode = 0
+offset_left = -7.0
+offset_top = -23.0
+offset_right = 72.0
+text = "Asia"
+horizontal_alignment = 1
+script = ExtResource("11_m2r7n")

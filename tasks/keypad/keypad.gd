@@ -7,9 +7,8 @@ extends Control
 var entered_code := ""
 var max_length := 6
 
-# 5 rows × 3 columns
 const KEYS = [
-	["",  "",  ""],      # display row (ignored)
+	["",  "",  ""],
 	["1", "2", "3"],
 	["4", "5", "6"],
 	["7", "8", "9"],
@@ -20,10 +19,12 @@ func _ready():
 	randomize()
 	generate_secret_key()
 	input_label.text = ""
+	mouse_filter = Control.MOUSE_FILTER_STOP
 	keypad_image.mouse_filter = Control.MOUSE_FILTER_STOP
 	keypad_image.gui_input.connect(_on_keypad_gui_input)
 	visible = false
 func _on_keypad_gui_input(event):
+	print("some")
 	if not visible:
 		return
 
@@ -31,31 +32,24 @@ func _on_keypad_gui_input(event):
 		var local_pos = keypad_image.get_local_mouse_position()
 		handle_keypad_click(local_pos)
 
-# -------------------------
-# RANDOM SECRET KEY
-# -------------------------
 func generate_secret_key():
 	var key := ""
 	for i in range(max_length):
 		key += str(randi() % 10)
 	secret_label.text = key
-	# secret_label.visible = false
 
 func start_task() -> void:
 	visible = true
 	clear_input()
 	generate_secret_key()
 
-# -------------------------
-# KEY DETECTION (5×3)
-# -------------------------
 func handle_keypad_click(pos: Vector2):
-	var size = keypad_image.size
+	var img_size = keypad_image.size
 	var cols = 3
 	var rows = 5
 
-	var cell_w = size.x / cols
-	var cell_h = size.y / rows
+	var cell_w = img_size.x / cols
+	var cell_h = img_size.y / rows
 
 	var col = int(pos.x / cell_w)
 	var row = int(pos.y / cell_h)
@@ -64,9 +58,11 @@ func handle_keypad_click(pos: Vector2):
 		return
 
 	var key = KEYS[row][col]
+	
+	print("key "+key)
 
 	if key == "":
-		return   # ignore display area
+		return
 
 	match key:
 		"X":
@@ -76,9 +72,6 @@ func handle_keypad_click(pos: Vector2):
 		_:
 			press_number(key)
 
-# -------------------------
-# INPUT LOGIC
-# -------------------------
 func press_number(num: String):
 	if entered_code.length() >= max_length:
 		return

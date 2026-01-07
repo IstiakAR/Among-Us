@@ -22,6 +22,8 @@ var server_peer_id: int = 1
 
 func connect_to(ip: String, port: int) -> Error:
 	disconnect_from_server()
+	# Ensure the TCP peer is back to STATUS_NONE before reconnecting.
+	_peer = StreamPeerTCP.new()
 	server_ip = ip
 	server_port = port
 	_buffer = PackedByteArray()
@@ -120,12 +122,12 @@ func _send_tcp_hello() -> void:
 	if my_peer_id <= 0:
 		return
 	# Announce desired identity; host may override.
-	var name := "Player"
+	var player_name := "Player"
 	var color := Color.WHITE
 	if Engine.has_singleton("Globals"):
-		name = str(Globals.player_name)
+		player_name = str(Globals.player_name)
 		color = Globals.player_color
-	var hello := NetPacket.new(PacketType.Type.HELLO, {"peer_id": my_peer_id, "name": name, "color": color})
+	var hello := NetPacket.new(PacketType.Type.HELLO, {"peer_id": my_peer_id, "name": player_name, "color": color})
 	send(hello)
 
 func _poll_udp() -> void:

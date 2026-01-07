@@ -1,0 +1,102 @@
+[gd_scene load_steps=5 format=3 uid="uid://cuw5dyw6cdtxd"]
+
+[ext_resource type="Script" uid="uid://4hohn706spe6" path="res://scripts/meeting_ui.gd" id="1_meet"]
+[ext_resource type="FontFile" uid="uid://btrfdqxm27o00" path="res://assets/VCR_OSD_MONO_1.001.ttf" id="2_font"]
+
+[sub_resource type="StyleBoxFlat" id="SB_Panel"]
+bg_color = Color(0.113725, 0.133333, 0.176471, 0.94)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.176471, 0.203922, 0.282353, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="SB_Chat"]
+bg_color = Color(0.0784314, 0.0862745, 0.113725, 0.95)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="MeetingUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_meet")
+
+[node name="DimBG" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.45)
+
+[node name="Container" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 5.0
+offset_top = 2.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VotePanel" type="PanelContainer" parent="Container"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("SB_Panel")
+
+[node name="VoteVBox" type="VBoxContainer" parent="Container/VotePanel"]
+layout_mode = 2
+
+[node name="PlayersScroll" type="ScrollContainer" parent="Container/VotePanel/VoteVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PlayersVBox" type="VBoxContainer" parent="Container/VotePanel/VoteVBox/PlayersScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Skip" type="Button" parent="Container/VotePanel/VoteVBox"]
+layout_mode = 2
+text = "Skip"
+
+[node name="ChatPanel" type="PanelContainer" parent="Container"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("SB_Panel")
+
+[node name="ChatVBox" type="VBoxContainer" parent="Container/ChatPanel"]
+layout_mode = 2
+
+[node name="ChatLog" type="RichTextLabel" parent="Container/ChatPanel/ChatVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/default_color = Color(1, 1, 1, 1)
+theme_override_fonts/normal_font = ExtResource("2_font")
+theme_override_styles/normal = SubResource("SB_Chat")
+fit_content = true
+
+[node name="ChatInputRow" type="HBoxContainer" parent="Container/ChatPanel/ChatVBox"]
+layout_mode = 2
+
+[node name="ChatInput" type="LineEdit" parent="Container/ChatPanel/ChatVBox/ChatInputRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("2_font")
+placeholder_text = "Type message..."
+
+[node name="Send" type="Button" parent="Container/ChatPanel/ChatVBox/ChatInputRow"]
+layout_mode = 2
+text = "Send"

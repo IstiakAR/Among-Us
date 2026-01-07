@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://cmsjliko6b837" path="res://tasks/download/download.tscn" id="8_3v32i"]
 [ext_resource type="PackedScene" uid="uid://c742duasnhyfs" path="res://tasks/circuit_match/circuit_match.tscn" id="9_qmn38"]
 [ext_resource type="Texture2D" uid="uid://cf5l2tpbcne2c" path="res://assets/Buttons.png" id="10_buttons"]
+[ext_resource type="PackedScene" path="res://scenes/MeetingUI.tscn" id="11_meet"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_fcw3y"]
 atlas = ExtResource("1_e7ka0")
@@ -189,3 +190,6 @@ offset_top = 523.0
 offset_right = 1141.0
 offset_bottom = 633.0
 texture = SubResource("AtlasTexture_use")
+
+[node name="MeetingUI" parent="UI" instance=ExtResource("11_meet")]
+visible = false

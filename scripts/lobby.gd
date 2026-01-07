@@ -25,15 +25,14 @@ func _ready() -> void:
 
 	if is_instance_valid(start_button):
 		start_button.gui_input.connect(_on_start_button_gui_input)
-		# Only host can start the game.
-		if Net.mode != "host":
-			start_button.visible = false
+		_update_start_button_visibility()
 
 	# Host has an immediate peer id; clients must wait for WELCOME.
 	if Net.mode == "host":
 		_my_peer_id = 1
 		_setup_local_player()
 		_sync_from_net_players()
+		_update_start_button_visibility()
 		return
 
 	# If the client already has a peer id (scene loaded late), sync now.
@@ -41,12 +40,24 @@ func _ready() -> void:
 		_my_peer_id = Net.my_peer_id
 		_setup_local_player()
 		_sync_from_net_players()
+		_update_start_button_visibility()
 
 func _on_net_connected() -> void:
 	# Client receives peer id after WELCOME.
 	_my_peer_id = Net.my_peer_id
 	_setup_local_player()
 	_sync_from_net_players()
+	_update_start_button_visibility()
+
+func _update_start_button_visibility() -> void:
+	if not is_instance_valid(start_button):
+		return
+	# Normal listen-host: only host can start.
+	if Net.mode == "host":
+		start_button.visible = true
+		return
+	# Dedicated online room: there is no host player (peer_id 1) so allow a client to start.
+	start_button.visible = (Net.mode == "client" and not Net.players.has(1))
 
 func _sync_from_net_players() -> void:
 	if _my_peer_id <= 0:
@@ -58,6 +69,11 @@ func _sync_from_net_players() -> void:
 		if typeof(d) != TYPE_DICTIONARY:
 			continue
 		_handle_player_join(NetPacket.new(PacketType.Type.PLAYER_JOIN, {"player": d}))
+	# Safety: in LAN client mode ensure host (peer_id=1) is spawned if present.
+	if Net.mode == "client" and Net.players.has(1) and not _avatars.has(1):
+		var d1: Variant = Net.players[1]
+		if typeof(d1) == TYPE_DICTIONARY:
+			_handle_player_join(NetPacket.new(PacketType.Type.PLAYER_JOIN, {"player": d1}))
 
 func _setup_local_player() -> void:
 	if local_player == null:
@@ -108,8 +124,10 @@ func _on_tcp_packet(_from_peer_id: int, packet: NetPacket) -> void:
 	match packet.type:
 		PacketType.Type.PLAYER_JOIN:
 			_handle_player_join(packet)
+			_update_start_button_visibility()
 		PacketType.Type.PLAYER_LEAVE:
 			_handle_player_leave(packet)
+			_update_start_button_visibility()
 		PacketType.Type.START_GAME:
 			_handle_start_game(packet)
 		_:
@@ -121,7 +139,8 @@ func _on_start_button_gui_input(event: InputEvent) -> void:
 	var mb := event as InputEventMouseButton
 	if not mb.pressed or mb.button_index != MouseButton.MOUSE_BUTTON_LEFT:
 		return
-	if Net.mode != "host":
+	var can_start := (Net.mode == "host") or (Net.mode == "client" and not Net.players.has(1))
+	if not can_start:
 		return
 	if _game_starting:
 		return
@@ -174,12 +193,21 @@ func _handle_player_join(packet: NetPacket) -> void:
 	if peer_id <= 0:
 		return
 	var ps := PlayerState.from_dict(d)
+	# Debug: trace spawns
+	print("lobby: PLAYER_JOIN peer_id=", peer_id, " my=", _my_peer_id, " have=", _avatars.has(peer_id))
 
 	if peer_id == _my_peer_id:
 		# Apply host-assigned color to local avatar.
 		var sprite := local_player.get_node_or_null("AnimatedSprite2D")
 		if sprite != null and sprite is AnimatedSprite2D:
-			(sprite as AnimatedSprite2D).modulate = ps.color
+			var anim_sprite := sprite as AnimatedSprite2D
+			if anim_sprite.material != null and anim_sprite.material is ShaderMaterial:
+				# Ensure per-instance material
+				anim_sprite.material = (anim_sprite.material as ShaderMaterial).duplicate(true)
+				var sm := anim_sprite.material as ShaderMaterial
+				sm.set_shader_parameter("tint_color", ps.color)
+			else:
+				anim_sprite.modulate = ps.color
 		if local_player.has_method("set_display_name"):
 			local_player.call("set_display_name", ps.name)
 		return
@@ -202,7 +230,14 @@ func _handle_player_join(packet: NetPacket) -> void:
 	# Apply color.
 	var remote_sprite := node.get_node_or_null("AnimatedSprite2D")
 	if remote_sprite != null and remote_sprite is AnimatedSprite2D:
-		(remote_sprite as AnimatedSprite2D).modulate = ps.color
+		var anim_sprite := remote_sprite as AnimatedSprite2D
+		if anim_sprite.material != null and anim_sprite.material is ShaderMaterial:
+			# Ensure per-instance material for remote avatar
+			anim_sprite.material = (anim_sprite.material as ShaderMaterial).duplicate(true)
+			var sm := anim_sprite.material as ShaderMaterial
+			sm.set_shader_parameter("tint_color", ps.color)
+		else:
+			anim_sprite.modulate = ps.color
 	if node.has_method("set_display_name"):
 		node.call("set_display_name", ps.name)
 

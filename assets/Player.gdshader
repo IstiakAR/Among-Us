@@ -7,6 +7,7 @@ void fragment() {
 
     float luminosity = dot(tex.rgb, vec3(1.0, 1.0, 0.7));
     vec3 result = luminosity * vec3(1,1,1);
-
-    COLOR = vec4(result, tex.a);
+    // Apply tint color to grayscale result; use tint alpha for overall intensity.
+    vec3 colored = result * tint_color.rgb;
+    COLOR = vec4(colored, tex.a * tint_color.a);
 }

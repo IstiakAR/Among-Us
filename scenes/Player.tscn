@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://ccneigd4fmki7"]
+[gd_scene load_steps=15 format=3 uid="uid://ccneigd4fmki7"]
 
 [ext_resource type="Texture2D" uid="uid://bvlak2djb3x8a" path="res://assets/Walk.png" id="1_p0vlq"]
 [ext_resource type="Script" uid="uid://blf2wg1sfkq2s" path="res://scripts/player.gd" id="1_v6fml"]
@@ -8,6 +8,14 @@
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_mdl7e"]
 shader = ExtResource("2_mdl7e")
 shader_parameter/tint_color = Color(1, 1, 1, 1)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cw2d6"]
+atlas = ExtResource("3_3li8b")
+region = Rect2(0, 1957, 94, 65)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_khinc"]
+atlas = ExtResource("3_3li8b")
+region = Rect2(224, 336, 97, 112)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_70d11"]
 atlas = ExtResource("3_3li8b")
@@ -31,6 +39,22 @@ region = Rect2(380, 1709, 93, 105)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_khinc"]
 animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cw2d6")
+}],
+"loop": true,
+"name": &"dead",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_khinc")
+}],
+"loop": true,
+"name": &"ghost",
+"speed": 5.0
+}, {
 "frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_70d11")
@@ -68,9 +92,7 @@ material = SubResource("ShaderMaterial_mdl7e")
 position = Vector2(-0.62501526, 1.75)
 scale = Vector2(0.3945783, 0.38671872)
 sprite_frames = SubResource("SpriteFrames_khinc")
-animation = &"walk"
-frame = 1
-frame_progress = 0.5950011
+animation = &"ghost"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0.75, 12)

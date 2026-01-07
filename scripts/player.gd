@@ -16,6 +16,7 @@ var _net_anim_state: StringName = &"stand"
 
 var _default_collision_layer: int = 0
 var _default_collision_mask: int = 0
+var is_dead: bool = false
 
 func _ready():
 	_default_collision_layer = collision_layer
@@ -23,7 +24,14 @@ func _ready():
 	_apply_locality()
 	# Local color (in online play, the host should confirm via PLAYER_JOIN).
 	if is_local and sprite:
-		sprite.modulate = Globals.player_color
+		# Prefer shader tint if material is a ShaderMaterial; make it unique per instance.
+		if sprite.material != null and sprite.material is ShaderMaterial:
+			# Ensure per-instance material to avoid changing other players.
+			sprite.material = (sprite.material as ShaderMaterial).duplicate(true)
+			var sm := sprite.material as ShaderMaterial
+			sm.set_shader_parameter("tint_color", Globals.player_color)
+		else:
+			sprite.modulate = Globals.player_color
 	if is_local:
 		set_display_name(Globals.player_name)
 	if is_local:
@@ -60,6 +68,9 @@ func _apply_locality() -> void:
 			collider.disabled = false
 
 func _physics_process(_delta):
+	if is_dead:
+		velocity = Vector2.ZERO
+		return
 	if not is_local:
 		return
 	var input_vector = Vector2.ZERO
@@ -88,6 +99,8 @@ func _physics_process(_delta):
 
 
 func _process(delta: float) -> void:
+	if is_dead:
+		return
 	if is_local:
 		return
 	if not _net_has_target:
@@ -112,6 +125,8 @@ func _process(delta: float) -> void:
 func apply_network_position(pos: Vector2) -> void:
 	# Called by networking code for remote players.
 	if is_local:
+		return
+	if is_dead:
 		return
 	if _last_network_pos == Vector2.INF:
 		_last_network_pos = pos
@@ -144,4 +159,20 @@ func _input(event: InputEvent) -> void:
 		TaskManager.start_task("keypad")
 	if event is InputEventKey and event.pressed and event.keycode == KEY_C:
 		TaskManager.start_task("circuit_match")
+
+func kill_player() -> void:
+	# Mark player as dead and freeze.
+	is_dead = true
+	velocity = Vector2.ZERO
+	_net_has_target = false
+	set_physics_process(false)
+	set_process(false)
+	if collider:
+		collider.disabled = true
+	if sprite:
+		sprite.play("dead")
+
+func use_interact() -> void:
+	if current_task_area:
+		TaskManager.start_task(current_task_area.task_id)
 		

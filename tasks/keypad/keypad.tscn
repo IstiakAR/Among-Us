@@ -9,7 +9,7 @@ region = Rect2(0, 0, 376, 503.846)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_pd5r7"]
 atlas = ExtResource("1_8dkbl")
-region = Rect2(0, 507.219, 254, 176.625)
+region = Rect2(0, 507.219, 250.29724, 176.625)
 
 [node name="keypad" type="Control"]
 layout_mode = 3

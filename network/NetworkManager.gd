@@ -14,6 +14,7 @@ signal private_room_created(info: Dictionary)
 signal matchmaker_error(message: String)
 signal lan_host_found(host_info: Dictionary)
 signal lan_host_lost(host_key: String)
+signal rooms_listed(rooms)
 
 @export var tcp_port: int = 8910
 @export var discovery_port: int = 9999
@@ -77,6 +78,7 @@ func _ready() -> void:
 	matchmaker.find_match_result.connect(_on_matchmaker_find_match)
 	matchmaker.join_code_result.connect(_on_matchmaker_join_code)
 	matchmaker.create_private_result.connect(_on_matchmaker_create_private)
+	matchmaker.list_rooms_result.connect(_on_matchmaker_list_rooms)
 
 	_color_palette = _load_color_palette()
 	_rng.randomize()
@@ -136,8 +138,13 @@ func _apply_cmdline_overrides() -> void:
 		tcp_port = port
 
 func _has_cmdline_flag(flag: String) -> bool:
+	# Check both full and user args; headless scripts may populate one or the other.
 	var args := OS.get_cmdline_args()
 	for a in args:
+		if a == flag:
+			return true
+	var uargs := OS.get_cmdline_user_args()
+	for a in uargs:
 		if a == flag:
 			return true
 	return false
@@ -162,7 +169,7 @@ func _start_server_on_available_port(min_port: int, max_port: int) -> Error:
 	# Returns OK on success, or the last error if none worked.
 	if min_port <= 0 or max_port <= 0 or max_port < min_port:
 		return ERR_INVALID_PARAMETER
-	var last_err: int = ERR_CANT_CREATE
+	var last_err: Error = ERR_CANT_CREATE
 	for p in range(min_port, max_port + 1):
 		last_err = server.start(p)
 		if last_err == OK:
@@ -196,6 +203,11 @@ func create_private_room(region: String = "auto") -> void:
 	matchmaker.matchmaker_ip = matchmaker_ip
 	matchmaker.matchmaker_port = matchmaker_port
 	matchmaker.request_create_private(region)
+
+func list_rooms(region: String) -> void:
+	matchmaker.matchmaker_ip = matchmaker_ip
+	matchmaker.matchmaker_port = matchmaker_port
+	matchmaker.request_list_rooms(region)
 
 func join_by_code(code: String) -> void:
 	matchmaker.matchmaker_ip = matchmaker_ip
@@ -254,6 +266,18 @@ func _on_server_packet_received(from_peer_id: int, packet: NetPacket) -> void:
 		if packet.type == PacketType.Type.HELLO:
 			_handle_host_hello(from_peer_id, packet)
 			# Still emit to allow gameplay scripts to react.
+		elif packet.type == PacketType.Type.START_GAME:
+			# Dedicated rooms don't have a local UI host; allow a client to initiate and relay.
+			server.broadcast(packet)
+		elif packet.type == PacketType.Type.PLAYER_KILL:
+			# Relay kill events to all clients.
+			server.broadcast(packet, from_peer_id)
+		elif packet.type == PacketType.Type.MEETING_START:
+			# Relay meeting start to all clients so everyone opens the meeting.
+			server.broadcast(packet, from_peer_id)
+		elif packet.type == PacketType.Type.CHAT_MESSAGE or packet.type == PacketType.Type.VOTE:
+			# Relay chat and vote packets from a client to everyone else.
+			server.broadcast(packet, from_peer_id)
 		host_migration.handle_packet(packet)
 		emit_signal("packet_received", from_peer_id, packet)
 		return
@@ -279,20 +303,30 @@ func _handle_host_hello(from_peer_id: int, packet: NetPacket) -> void:
 	p.color = assigned["color"] as Color
 	p.color_id = int(assigned["color_id"])
 	players[from_peer_id] = p.to_dict()
+	print("host_hello: registered player peer_id=%d name=%s color_id=%d" % [from_peer_id, p.name, p.color_id])
 
 	# Send existing players to the newly joined peer.
 	for k in players.keys():
 		var pid := int(k)
 		if pid == from_peer_id:
 			continue
+		# Never send a synthetic host player (peer_id=1) from dedicated/headless servers.
+		if pid == 1 and (OS.has_feature("headless") or _has_cmdline_flag("--dedicated")):
+			continue
 		var existing := NetPacket.new(PacketType.Type.PLAYER_JOIN, {"player": players[pid]})
 		server.send_to(from_peer_id, existing)
+
+	# Redundant safety: ensure host (1) is sent if present and not dedicated/headless.
+	if players.has(1) and not (OS.has_feature("headless") or _has_cmdline_flag("--dedicated")):
+		var host_pkt := NetPacket.new(PacketType.Type.PLAYER_JOIN, {"player": players[1]})
+		server.send_to(from_peer_id, host_pkt)
 
 	# Broadcast the new player to everyone else and confirm to the new peer.
 	var joined := NetPacket.new(PacketType.Type.PLAYER_JOIN, {"player": players[from_peer_id]})
 	server.send_to(from_peer_id, joined)
 	server.broadcast(joined, from_peer_id)
 	# Host instance isn't a TCP peer; deliver locally so it can spawn avatars.
+	print("host_hello: broadcast PLAYER_JOIN for peer_id=%d" % from_peer_id)
 	emit_signal("packet_received", from_peer_id, joined)
 
 func _load_color_palette() -> Array[Color]:
@@ -343,8 +377,6 @@ func _assign_unique_color(desired: Color) -> Dictionary:
 	var pick := free_ids[_rng.randi_range(0, free_ids.size() - 1)]
 	return {"ok": true, "color": _color_palette[pick], "color_id": pick}
 
-	return {"ok": false}
-
 func _on_server_udp_packet_received(from_peer_id: int, packet: NetPacket) -> void:
 	if mode == "host" and packet.type == PacketType.Type.PLAYER_STATE:
 		# Relay client movement to all other clients.
@@ -368,6 +400,7 @@ func _on_client_packet_received(packet: NetPacket) -> void:
 		var pd: Variant = packet.payload.get("player", null)
 		if typeof(pd) == TYPE_DICTIONARY:
 			var peer_id := int((pd as Dictionary).get("peer_id", 0))
+			print("client_packet: PLAYER_JOIN peer_id=%d my_peer_id=%d mode=%s" % [peer_id, my_peer_id, mode])
 			if peer_id > 0:
 				players[peer_id] = pd as Dictionary
 			if peer_id == my_peer_id:
@@ -385,22 +418,35 @@ func _register_host_player() -> void:
 	# Host isn't a TCP peer, so we register it explicitly.
 	if mode != "host":
 		return
-	if players.has(1):
+	# Dedicated room servers should not appear as a player.
+	if _has_cmdline_flag("--dedicated"):
+		print("register_host_player: skipping (dedicated flag present)")
 		return
+	# Headless processes are dedicated servers; never add a local host player.
+	if OS.has_feature("headless"):
+		print("register_host_player: skipping (headless feature detected)")
+		return
+	if players.has(1):
+		print("register_host_player: skipping (players already has peer_id=1)")
+		return
+	var host_name := "Player"
+	var desired_color := Color.WHITE
+	# If Globals autoload exists, use its configured name and color.
+	if Engine.has_singleton("Globals"):
+		host_name = str(Globals.player_name)
+		desired_color = Globals.player_color
+	print("register_host_player: adding local host player; name=%s" % host_name)
 	var p := PlayerState.new()
 	p.peer_id = 1
-	if Engine.has_singleton("Globals"):
-		p.name = str(Globals.player_name)
-		var assigned := _assign_unique_color(Globals.player_color)
-		if assigned.get("ok", false):
-			p.color = assigned["color"] as Color
-			p.color_id = int(assigned["color_id"])
-	else:
-		p.name = "Host"
-		p.color = Color.WHITE
-		p.color_id = -1
+	p.name = host_name
+	var assigned := _assign_unique_color(desired_color)
+	if assigned.get("ok", false):
+		p.color = assigned["color"] as Color
+		p.color_id = int(assigned["color_id"])
+		print("register_host_player: assigned color_id=%d" % p.color_id)
 	players[1] = p.to_dict()
 	# Notify local host scripts (Lobby spawner) that host exists.
+	print("register_host_player: emitting PLAYER_JOIN for peer_id=1")
 	emit_signal("packet_received", 1, NetPacket.new(PacketType.Type.PLAYER_JOIN, {"player": players[1]}))
 
 func _on_client_udp_packet_received(packet: NetPacket) -> void:
@@ -439,3 +485,18 @@ func _on_matchmaker_create_private(ok: bool, resp: Dictionary) -> void:
 	var info := {"ip": ip, "tcp_port": port, "code": str(resp.get("code", "")), "region": str(resp.get("region", ""))}
 	emit_signal("private_room_created", info)
 	join(ip, port)
+
+func _on_matchmaker_list_rooms(ok: bool, resp: Dictionary) -> void:
+	if not ok:
+		emit_signal("rooms_listed", [])
+		return
+	var rooms: Array[Dictionary] = []
+	var arr: Array = resp.get("rooms", [])
+	for r in arr:
+		var ip := str(r.get("ip", ""))
+		var port := int(r.get("port", 0))
+		var region := str(r.get("region", ""))
+		if ip == "" or port <= 0:
+			continue
+		rooms.append({"ip": ip, "tcp_port": port, "region": region})
+	emit_signal("rooms_listed", rooms)

@@ -22,9 +22,17 @@ func _ready():
 	refresh_button.gui_input.connect(_on_refresh_gui_input)
 	code_join_button.pressed.connect(_on_code_join_pressed)
 
+	# Avoid duplicate connections when revisiting this scene.
+	if not Net.matchmaker_error.is_connected(_on_matchmaker_error):
+		Net.matchmaker_error.connect(_on_matchmaker_error)
+
 	# Refresh list when LAN discovery finds/loses hosts.
 	Net.lan_host_found.connect(func(_info: Dictionary): _refresh_join_list())
 	Net.lan_host_lost.connect(func(_key: String): _refresh_join_list())
+
+	# Online rooms listing results.
+	if not Net.rooms_listed.is_connected(_on_rooms_listed):
+		Net.rooms_listed.connect(_on_rooms_listed)
 
 	for label in [label_create, label_join, label_code]:
 		label.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -62,9 +70,12 @@ func _on_create_pressed() -> void:
 		get_tree().change_scene_to_file("res://scenes/Lobby.tscn")
 		return
 
-	Net.private_room_created.connect(_on_private_room_created, CONNECT_ONE_SHOT)
-	Net.matchmaker_error.connect(_on_matchmaker_error)
-	Net.create_private_room("auto")
+	if not Net.private_room_created.is_connected(_on_private_room_created):
+		Net.private_room_created.connect(_on_private_room_created, CONNECT_ONE_SHOT)
+	# Use selected region from Globals to create the private room.
+	var mm_map := {"Asia": "asia", "Europe": "eu", "NA": "na"}
+	var mm_region := str(mm_map.get(Globals.region, "auto"))
+	Net.create_private_room(mm_region)
 
 var _discovery_active := false
 
@@ -103,39 +114,37 @@ func _refresh_join_list() -> void:
 			join_list.set_item_metadata(idx, {"ip": ip, "tcp_port": port})
 		return
 
-	# ONLINE: show regions (matchmaker has fixed IP; region servers are discovered via matchmaker).
-	var regions := [
-		{"name": "NA", "region": "na"},
-		{"name": "EU", "region": "eu"},
-		{"name": "ASIA", "region": "asia"},
-	]
-	for r in regions:
-		var idx := join_list.add_item(str(r["name"]))
-		join_list.set_item_metadata(idx, {"region": str(r["region"])})
+	# ONLINE: request rooms list for the selected region via matchmaker.
+	var mm_map := {"Asia": "asia", "Europe": "eu", "NA": "na"}
+	var mm_region := str(mm_map.get(Globals.region, "auto"))
+	Net.list_rooms(mm_region)
+
+func _on_rooms_listed(rooms) -> void:
+	# Populate join_list with room entries returned by matchmaker.
+	join_list.clear()
+	for r in rooms:
+		var ip := str(r.get("ip", ""))
+		var port := int(r.get("tcp_port", 0))
+		if ip == "" or port <= 0:
+			continue
+		var label := "%s:%d" % [ip, port]
+		var idx := join_list.add_item(label)
+		join_list.set_item_metadata(idx, {"ip": ip, "tcp_port": port})
 
 func _try_join_index(index: int) -> void:
 	var meta = join_list.get_item_metadata(index)
 	if typeof(meta) != TYPE_DICTIONARY:
 		return
-	if Globals.playing_online == 0:
-		var ip := str(meta.get("ip", ""))
-		var port := int(meta.get("tcp_port", 0))
-		if ip == "" or port <= 0:
-			return
-		var err := Net.join(ip, port)
-		if err != OK:
-			push_error("Failed to join: %s" % error_string(err))
-			return
-		get_tree().change_scene_to_file("res://scenes/Lobby.tscn")
+	# Join by IP/port for both LOCAL and ONLINE items.
+	var ip := str(meta.get("ip", ""))
+	var port := int(meta.get("tcp_port", 0))
+	if ip == "" or port <= 0:
 		return
-
-	# ONLINE: clicking a region does matchmaking (quick find).
-	var region := str(meta.get("region", ""))
-	if region == "":
+	var err := Net.join(ip, port)
+	if err != OK:
+		push_error("Failed to join: %s" % error_string(err))
 		return
-	Net.match_found.connect(_on_match_found, CONNECT_ONE_SHOT)
-	Net.matchmaker_error.connect(_on_matchmaker_error)
-	Net.find_match(region)
+	get_tree().change_scene_to_file("res://scenes/Lobby.tscn")
 
 func _on_join_list_item_clicked(index: int, _at_position: Vector2, mouse_button_index: int) -> void:
 	if mouse_button_index != MouseButton.MOUSE_BUTTON_LEFT:
@@ -168,16 +177,18 @@ func _on_code_join_pressed() -> void:
 	var code := code_text.text.strip_edges()
 	if code == "":
 		return
-	Net.connected.connect(_on_net_connected_go_lobby, CONNECT_ONE_SHOT)
-	Net.matchmaker_error.connect(_on_matchmaker_error)
+	if not Net.connected.is_connected(_on_net_connected_go_lobby):
+		Net.connected.connect(_on_net_connected_go_lobby, CONNECT_ONE_SHOT)
 	Net.join_by_code(code)
 
 func _on_match_found(_info: Dictionary) -> void:
 	# Net.join() is called internally; wait for TCP connect then go lobby.
-	Net.connected.connect(_on_net_connected_go_lobby, CONNECT_ONE_SHOT)
+	if not Net.connected.is_connected(_on_net_connected_go_lobby):
+		Net.connected.connect(_on_net_connected_go_lobby, CONNECT_ONE_SHOT)
 
 func _on_private_room_created(_info: Dictionary) -> void:
-	Net.connected.connect(_on_net_connected_go_lobby, CONNECT_ONE_SHOT)
+	if not Net.connected.is_connected(_on_net_connected_go_lobby):
+		Net.connected.connect(_on_net_connected_go_lobby, CONNECT_ONE_SHOT)
 
 func _on_net_connected_go_lobby() -> void:
 	get_tree().change_scene_to_file("res://scenes/Lobby.tscn")
