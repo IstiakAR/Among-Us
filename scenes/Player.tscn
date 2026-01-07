@@ -69,10 +69,22 @@ position = Vector2(-0.62501526, 1.75)
 scale = Vector2(0.3945783, 0.38671872)
 sprite_frames = SubResource("SpriteFrames_khinc")
 animation = &"walk"
+frame = 1
+frame_progress = 0.5950011
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0.75, 12)
 shape = SubResource("RectangleShape2D_mdl7e")
 
 [node name="Camera2D" type="Camera2D" parent="."]
-zoom = Vector2(1.75, 1.75)
+
+[node name="NameLabel" type="Label" parent="."]
+z_index = 10
+offset_left = -64.0
+offset_top = -35.0
+offset_right = 67.0
+offset_bottom = -21.0
+theme_override_font_sizes/font_size = 10
+text = "Player"
+horizontal_alignment = 1
+vertical_alignment = 1

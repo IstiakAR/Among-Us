@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://cpq2n7wtdo3in" path="res://tasks/keypad/keypad.tscn" id="7_3v32i"]
 [ext_resource type="PackedScene" uid="uid://cmsjliko6b837" path="res://tasks/download/download.tscn" id="8_3v32i"]
 [ext_resource type="PackedScene" uid="uid://c742duasnhyfs" path="res://tasks/circuit_match/circuit_match.tscn" id="9_qmn38"]
+[ext_resource type="Texture2D" uid="uid://cf5l2tpbcne2c" path="res://assets/Buttons.png" id="10_buttons"]
 [ext_resource type="Texture2D" uid="uid://b3xmk08bxvwyf" path="res://assets/tasks_add.png" id="10_dkv1d"]
 [ext_resource type="Script" uid="uid://djtr7jjvpekh0" path="res://scenes/task_1.gd" id="11_c56jd"]
 
@@ -21,6 +22,18 @@ height = 242.0
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_fcw3y"]
 size = Vector2(97, 65.25)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_report"]
+atlas = ExtResource("10_buttons")
+region = Rect2(591.0895, 2.5816803, 115.20111, 114.94334)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kill"]
+atlas = ExtResource("10_buttons")
+region = Rect2(921.2712, 120.37084, 110.86041, 110.86039)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_use"]
+atlas = ExtResource("10_buttons")
+region = Rect2(1151.2358, 111.70988, 109.128174, 110.860405)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_x4vn4"]
 atlas = ExtResource("10_dkv1d")
@@ -118,7 +131,6 @@ script = ExtResource("4_kvlix")
 
 [node name="UI" type="CanvasLayer" parent="."]
 layer = 1000
-follow_viewport_enabled = true
 
 [node name="TaskUI" type="Control" parent="UI"]
 z_index = 100
@@ -151,6 +163,38 @@ layout_mode = 1
 [node name="CircuitMatch" parent="UI/TaskUI" instance=ExtResource("9_qmn38")]
 visible = false
 layout_mode = 1
+
+[node name="HUD" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ReportButton" type="TextureRect" parent="UI/HUD"]
+layout_mode = 0
+offset_left = 895.0
+offset_top = 520.0
+offset_right = 1021.0
+offset_bottom = 638.0
+texture = SubResource("AtlasTexture_report")
+
+[node name="KillButton" type="TextureRect" parent="UI/HUD"]
+layout_mode = 0
+offset_left = 1036.0
+offset_top = 524.0
+offset_right = 1146.0
+offset_bottom = 634.0
+texture = SubResource("AtlasTexture_kill")
+
+[node name="UseButton" type="TextureRect" parent="UI/HUD"]
+layout_mode = 0
+offset_left = 1032.0
+offset_top = 523.0
+offset_right = 1141.0
+offset_bottom = 633.0
+texture = SubResource("AtlasTexture_use")
 
 [node name="task1" type="TextureRect" parent="."]
 offset_left = 2182.0

@@ -1,16 +1,30 @@
-[gd_scene load_steps=5 format=3 uid="uid://boypmurtm7i3j"]
+[gd_scene load_steps=8 format=3 uid="uid://boypmurtm7i3j"]
 
 [ext_resource type="Texture2D" uid="uid://dpqd3gl1s55d3" path="res://assets/Stars.png" id="1_0y700"]
 [ext_resource type="Texture2D" uid="uid://iwaov1iogpay" path="res://assets/Lobby.png" id="1_gv8if"]
 [ext_resource type="PackedScene" uid="uid://ccneigd4fmki7" path="res://scenes/Player.tscn" id="3_cdhm0"]
+[ext_resource type="Script" uid="uid://nbo071f875lm" path="res://scripts/lobby.gd" id="4_lobby_net"]
+[ext_resource type="Texture2D" uid="uid://cf5l2tpbcne2c" path="res://assets/Buttons.png" id="5_oeg6l"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0y700"]
 atlas = ExtResource("1_gv8if")
 region = Rect2(1.0910034, 4.000046, 998.6923, 811.6247)
 
-[node name="Lobby" type="Node2D"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_jp1kc"]
+atlas = ExtResource("5_oeg6l")
+region = Rect2(1056.9773, -0.068374634, 190.54126, 112.5926)
+
+[node name="Lobby" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("4_lobby_net")
 
 [node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 0
 offset_left = -217.0
 offset_top = -262.0
 offset_right = 1316.0
@@ -18,6 +32,7 @@ offset_bottom = 1006.0
 color = Color(0.078431375, 0.078431375, 0.078431375, 1)
 
 [node name="BG1" type="TextureRect" parent="."]
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -31,6 +46,7 @@ texture = ExtResource("1_0y700")
 stretch_mode = 1
 
 [node name="LobbySprite" type="TextureRect" parent="."]
+layout_mode = 0
 offset_left = 163.0
 offset_right = 971.0
 offset_bottom = 648.0
@@ -58,3 +74,48 @@ polygon = PackedVector2Array(448, 229, 448, 242, 474, 253, 487, 246, 487, 233, 4
 
 [node name="Player" parent="." instance=ExtResource("3_cdhm0")]
 position = Vector2(541, 306)
+
+[node name="UI" type="CanvasLayer" parent="."]
+layer = 1000
+
+[node name="HUD" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="StartButton" type="TextureRect" parent="UI/HUD"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = 471.0
+offset_top = -66.0
+offset_right = 662.4075
+offset_bottom = 46.0
+grow_horizontal = 2
+grow_vertical = 0
+scale = Vector2(0.5, 0.5)
+texture = SubResource("AtlasTexture_jp1kc")
+
+[node name="CountdownLabel" type="Label" parent="UI/HUD"]
+visible = false
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -150.0
+offset_top = -170.0
+offset_right = 150.0
+offset_bottom = -140.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "Starting in 5"
+horizontal_alignment = 1
+vertical_alignment = 1

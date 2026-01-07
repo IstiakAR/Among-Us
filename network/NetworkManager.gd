@@ -38,6 +38,12 @@ var matchmaker: MatchmakerClient
 var mode: String = "offline"
 var my_peer_id: int = 0
 
+# peer_id -> PlayerState.to_dict()
+var players: Dictionary = {}
+
+var _color_palette: Array[Color] = []
+var _rng := RandomNumberGenerator.new()
+
 func _ready() -> void:
 	server = GameServer.new()
 	client = GameClient.new()
@@ -72,6 +78,9 @@ func _ready() -> void:
 	matchmaker.join_code_result.connect(_on_matchmaker_join_code)
 	matchmaker.create_private_result.connect(_on_matchmaker_create_private)
 
+	_color_palette = _load_color_palette()
+	_rng.randomize()
+
 	# Optional dedicated server mode: run this exported binary headless and pass:
 	#   --dedicated --port=30123
 	# This starts TCP + UDP on the port and does not require any scene scripts.
@@ -92,6 +101,7 @@ func host_lan() -> Error:
 	mode = "host"
 	my_peer_id = 1
 	emit_signal("mode_changed", mode)
+	_register_host_player()
 
 	lan.discovery_port = discovery_port
 	var err := lan.start_advertising(server_name, tcp_port)
@@ -107,6 +117,7 @@ func host_internet() -> Error:
 	mode = "host"
 	my_peer_id = 1
 	emit_signal("mode_changed", mode)
+	_register_host_player()
 	return OK
 
 func _apply_cmdline_overrides() -> void:
@@ -195,6 +206,7 @@ func disconnect_all() -> void:
 	lan.stop()
 	server.stop()
 	client.disconnect_from_server()
+	players.clear()
 	mode = "offline"
 	my_peer_id = 0
 	emit_signal("mode_changed", mode)
@@ -228,18 +240,120 @@ func _on_server_peer_connected(peer_id: int) -> void:
 	emit_signal("peer_connected", peer_id)
 
 func _on_server_peer_disconnected(peer_id: int) -> void:
+	if players.has(peer_id):
+		players.erase(peer_id)
+		var left := NetPacket.new(PacketType.Type.PLAYER_LEAVE, {"peer_id": peer_id})
+		server.broadcast(left)
+		# Also notify local host listeners.
+		emit_signal("packet_received", 1, left)
 	emit_signal("peer_disconnected", peer_id)
 
 func _on_server_packet_received(from_peer_id: int, packet: NetPacket) -> void:
+	# Host can intercept/control certain packets.
+	if mode == "host":
+		if packet.type == PacketType.Type.HELLO:
+			_handle_host_hello(from_peer_id, packet)
+			# Still emit to allow gameplay scripts to react.
+		host_migration.handle_packet(packet)
+		emit_signal("packet_received", from_peer_id, packet)
+		return
 	host_migration.handle_packet(packet)
 	emit_signal("packet_received", from_peer_id, packet)
 
+func _handle_host_hello(from_peer_id: int, packet: NetPacket) -> void:
+	# Client announces desired name/color.
+	var p := PlayerState.new()
+	p.peer_id = from_peer_id
+	p.name = str(packet.payload.get("name", "Player"))
+	var desired: Color = Color.WHITE
+	var c: Variant = packet.payload.get("color", Color.WHITE)
+	if typeof(c) == TYPE_COLOR:
+		desired = c as Color
+
+	var assigned := _assign_unique_color(desired)
+	if assigned["ok"] == false:
+		# No colors left.
+		server.send_to(from_peer_id, NetPacket.new(PacketType.Type.ERROR, {"reason": "no_colors_available"}))
+		server.kick(from_peer_id)
+		return
+	p.color = assigned["color"] as Color
+	p.color_id = int(assigned["color_id"])
+	players[from_peer_id] = p.to_dict()
+
+	# Send existing players to the newly joined peer.
+	for k in players.keys():
+		var pid := int(k)
+		if pid == from_peer_id:
+			continue
+		var existing := NetPacket.new(PacketType.Type.PLAYER_JOIN, {"player": players[pid]})
+		server.send_to(from_peer_id, existing)
+
+	# Broadcast the new player to everyone else and confirm to the new peer.
+	var joined := NetPacket.new(PacketType.Type.PLAYER_JOIN, {"player": players[from_peer_id]})
+	server.send_to(from_peer_id, joined)
+	server.broadcast(joined, from_peer_id)
+	# Host instance isn't a TCP peer; deliver locally so it can spawn avatars.
+	emit_signal("packet_received", from_peer_id, joined)
+
+func _load_color_palette() -> Array[Color]:
+	# Read the swatches from scenes/User_Settings.tscn so we don't duplicate values.
+	var out: Array[Color] = []
+	var packed: PackedScene = load("res://scenes/User_Settings.tscn")
+	if packed == null:
+		return out
+	var root := packed.instantiate()
+	if root == null:
+		return out
+	var grid: Node = root.get_node_or_null("ColorGrid")
+	if grid != null:
+		for child in grid.get_children():
+			if child is ColorRect:
+				out.append((child as ColorRect).color)
+	root.queue_free()
+	return out
+
+func _assign_unique_color(desired: Color) -> Dictionary:
+	# Returns {"ok": bool, "color": Color, "color_id": int}
+	if _color_palette.is_empty():
+		# Fallback: allow any color if palette wasn't found.
+		return {"ok": true, "color": desired, "color_id": -1}
+
+	var used: Dictionary = {}
+	for k in players.keys():
+		var pid := int(k)
+		var pd: Dictionary = players[pid]
+		var v: Variant = pd.get("color", null)
+		if typeof(v) == TYPE_COLOR:
+			used[v as Color] = true
+
+	# Prefer desired if it's in the palette and unused.
+	for i in range(_color_palette.size()):
+		var palette_color := _color_palette[i]
+		if palette_color.is_equal_approx(desired) and not used.has(palette_color):
+			return {"ok": true, "color": palette_color, "color_id": i}
+
+	# Otherwise pick a random free palette color.
+	var free_ids: Array[int] = []
+	for i in range(_color_palette.size()):
+		var palette_color := _color_palette[i]
+		if not used.has(palette_color):
+			free_ids.append(i)
+	if free_ids.is_empty():
+		return {"ok": false}
+	var pick := free_ids[_rng.randi_range(0, free_ids.size() - 1)]
+	return {"ok": true, "color": _color_palette[pick], "color_id": pick}
+
+	return {"ok": false}
+
 func _on_server_udp_packet_received(from_peer_id: int, packet: NetPacket) -> void:
+	if mode == "host" and packet.type == PacketType.Type.PLAYER_STATE:
+		# Relay client movement to all other clients.
+		server.broadcast_udp(packet, from_peer_id)
 	emit_signal("udp_packet_received", from_peer_id, packet)
 
 func _on_client_connected() -> void:
-	my_peer_id = client.my_peer_id
-	emit_signal("connected")
+	# Wait for WELCOME before emitting connected (we need my_peer_id set).
+	pass
 
 func _on_client_disconnected() -> void:
 	my_peer_id = 0
@@ -249,8 +363,45 @@ func _on_client_disconnected() -> void:
 func _on_client_packet_received(packet: NetPacket) -> void:
 	if packet.type == PacketType.Type.WELCOME:
 		my_peer_id = client.my_peer_id
+		emit_signal("connected")
+	elif packet.type == PacketType.Type.PLAYER_JOIN:
+		var pd: Variant = packet.payload.get("player", null)
+		if typeof(pd) == TYPE_DICTIONARY:
+			var peer_id := int((pd as Dictionary).get("peer_id", 0))
+			if peer_id > 0:
+				players[peer_id] = pd as Dictionary
+			if peer_id == my_peer_id:
+				var v: Variant = (pd as Dictionary).get("color", null)
+				if typeof(v) == TYPE_COLOR and Engine.has_singleton("Globals"):
+					Globals.player_color = v as Color
+	elif packet.type == PacketType.Type.PLAYER_LEAVE:
+		var peer_id := int(packet.payload.get("peer_id", 0))
+		if peer_id > 0 and players.has(peer_id):
+			players.erase(peer_id)
 	host_migration.handle_packet(packet)
 	emit_signal("packet_received", client.server_peer_id, packet)
+
+func _register_host_player() -> void:
+	# Host isn't a TCP peer, so we register it explicitly.
+	if mode != "host":
+		return
+	if players.has(1):
+		return
+	var p := PlayerState.new()
+	p.peer_id = 1
+	if Engine.has_singleton("Globals"):
+		p.name = str(Globals.player_name)
+		var assigned := _assign_unique_color(Globals.player_color)
+		if assigned.get("ok", false):
+			p.color = assigned["color"] as Color
+			p.color_id = int(assigned["color_id"])
+	else:
+		p.name = "Host"
+		p.color = Color.WHITE
+		p.color_id = -1
+	players[1] = p.to_dict()
+	# Notify local host scripts (Lobby spawner) that host exists.
+	emit_signal("packet_received", 1, NetPacket.new(PacketType.Type.PLAYER_JOIN, {"player": players[1]}))
 
 func _on_client_udp_packet_received(packet: NetPacket) -> void:
 	emit_signal("udp_packet_received", client.server_peer_id, packet)

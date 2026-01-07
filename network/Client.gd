@@ -13,6 +13,7 @@ var _buffer := PackedByteArray()
 var _connected_at_msec: int = 0
 
 var _udp := PacketPeerUDP.new()
+var _udp_ready: bool = false
 
 var server_ip: String = ""
 var server_port: int = 0
@@ -34,6 +35,7 @@ func disconnect_from_server() -> void:
 		_peer.disconnect_from_host()
 	_buffer = PackedByteArray()
 	my_peer_id = 0
+	_udp_ready = false
 	_udp.close()
 
 func is_server_connected() -> bool:
@@ -47,7 +49,7 @@ func send(packet: NetPacket) -> void:
 
 func send_udp(packet: NetPacket) -> void:
 	# UDP is used for main game traffic; must be connected to server endpoint.
-	if _udp.get_socket() == null:
+	if not _udp_ready:
 		return
 	_udp.put_packet(packet.to_bytes())
 
@@ -73,36 +75,39 @@ func _process(_delta: float) -> void:
 		emit_signal("connected")
 
 	var avail := _peer.get_available_bytes()
-	if avail <= 0:
-		return
-	var got := _peer.get_partial_data(avail)
-	var err: int = got[0]
-	var chunk: PackedByteArray = got[1]
-	if err != OK:
-		disconnect_from_server()
-		emit_signal("disconnected")
-		return
+	if avail > 0:
+		var got := _peer.get_partial_data(avail)
+		var err: int = got[0]
+		var chunk: PackedByteArray = got[1]
+		if err != OK:
+			disconnect_from_server()
+			emit_signal("disconnected")
+			return
 
-	_buffer.append_array(chunk)
-	var unpacked := NetPacket.try_unpack_frames(_buffer)
-	_buffer = unpacked["remaining"]
-	for frame_bytes in unpacked["frames"]:
-		var packet := NetPacket.from_bytes(frame_bytes)
-		if packet.type == PacketType.Type.WELCOME:
-			my_peer_id = int(packet.payload.get("peer_id", 0))
-			server_peer_id = int(packet.payload.get("server_peer_id", 1))
-			_send_udp_hello()
-		emit_signal("packet_received", packet)
+		_buffer.append_array(chunk)
+		var unpacked := NetPacket.try_unpack_frames(_buffer)
+		_buffer = unpacked["remaining"]
+		for frame_bytes in unpacked["frames"]:
+			var packet := NetPacket.from_bytes(frame_bytes)
+			if packet.type == PacketType.Type.WELCOME:
+				my_peer_id = int(packet.payload.get("peer_id", 0))
+				server_peer_id = int(packet.payload.get("server_peer_id", 1))
+				_send_tcp_hello()
+				_send_udp_hello()
+			emit_signal("packet_received", packet)
 
+	# Always poll UDP while connected.
 	_poll_udp()
 
 func _setup_udp() -> void:
 	_udp.close()
+	_udp_ready = false
 	# Bind to ephemeral local port.
 	var err := _udp.bind(0, "0.0.0.0")
 	if err != OK:
 		return
 	_udp.connect_to_host(server_ip, server_port)
+	_udp_ready = true
 
 func _send_udp_hello() -> void:
 	if my_peer_id <= 0:
@@ -110,6 +115,18 @@ func _send_udp_hello() -> void:
 	# Announce UDP endpoint to server so it can send datagrams back.
 	var hello := NetPacket.new(PacketType.Type.HELLO, {"peer_id": my_peer_id, "transport": "udp"})
 	send_udp(hello)
+
+func _send_tcp_hello() -> void:
+	if my_peer_id <= 0:
+		return
+	# Announce desired identity; host may override.
+	var name := "Player"
+	var color := Color.WHITE
+	if Engine.has_singleton("Globals"):
+		name = str(Globals.player_name)
+		color = Globals.player_color
+	var hello := NetPacket.new(PacketType.Type.HELLO, {"peer_id": my_peer_id, "name": name, "color": color})
+	send(hello)
 
 func _poll_udp() -> void:
 	while _udp.get_available_packet_count() > 0:

@@ -58,6 +58,9 @@ func get_peer_ids() -> PackedInt32Array:
 		ids.append(int(k))
 	return ids
 
+func kick(peer_id: int) -> void:
+	_disconnect_peer(peer_id)
+
 func send_to(peer_id: int, packet: NetPacket) -> void:
 	if not _peers.has(peer_id):
 		return
@@ -107,8 +110,9 @@ func _poll_udp() -> void:
 		var port := _udp.get_packet_port()
 		var packet := NetPacket.from_bytes(bytes)
 		var peer_id := int(packet.payload.get("peer_id", 0))
-		# Record endpoint when client announces itself.
-		if peer_id > 0 and str(packet.payload.get("transport", "")) == "udp":
+		# Record endpoint for any packet that includes a peer_id.
+		# (UDP is lossy; we can't rely on a single HELLO being received.)
+		if peer_id > 0:
 			_udp_endpoints[peer_id] = {"ip": ip, "port": port}
 		if peer_id <= 0:
 			# Unknown sender; still surface as -1 for debugging.
