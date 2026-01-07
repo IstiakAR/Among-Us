@@ -6,11 +6,17 @@ signal stopped
 signal peer_connected(peer_id: int)
 signal peer_disconnected(peer_id: int)
 signal packet_received(peer_id: int, packet: NetPacket)
+signal udp_packet_received(peer_id: int, packet: NetPacket)
 
 @export var listen_port: int = 24567
 
 var _server := TCPServer.new()
 var _next_peer_id := 2 # 1 reserved for host/server
+
+var _udp := PacketPeerUDP.new()
+
+# peer_id -> {"ip": String, "port": int}
+var _udp_endpoints: Dictionary = {}
 
 # peer_id -> { "peer": StreamPeerTCP, "buffer": PackedByteArray, "seq": int }
 var _peers: Dictionary = {}
@@ -20,14 +26,25 @@ func start(port: int = -1) -> Error:
 		listen_port = port
 	stop()
 	var err := _server.listen(listen_port)
-	if err == OK:
-		emit_signal("started", listen_port)
-	return err
+	if err != OK:
+		return err
+
+	# Bind UDP on the same port for game traffic.
+	var udp_err := _udp.bind(listen_port, "0.0.0.0")
+	if udp_err != OK:
+		_server.stop()
+		return udp_err
+
+	_udp_endpoints.clear()
+	emit_signal("started", listen_port)
+	return OK
 
 func stop() -> void:
 	for peer_id in _peers.keys():
 		_disconnect_peer(int(peer_id))
 	_peers.clear()
+	_udp_endpoints.clear()
+	_udp.close()
 	if _server.is_listening():
 		_server.stop()
 		emit_signal("stopped")
@@ -51,6 +68,24 @@ func send_to(peer_id: int, packet: NetPacket) -> void:
 	var frame := NetPacket.pack_frame(bytes)
 	peer.put_data(frame)
 
+func send_udp_to(peer_id: int, packet: NetPacket) -> void:
+	if not _udp_endpoints.has(peer_id):
+		return
+	var ep: Dictionary = _udp_endpoints[peer_id]
+	var ip := str(ep.get("ip", ""))
+	var port := int(ep.get("port", 0))
+	if ip == "" or port <= 0:
+		return
+	_udp.set_dest_address(ip, port)
+	_udp.put_packet(packet.to_bytes())
+
+func broadcast_udp(packet: NetPacket, except_peer_id: int = -1) -> void:
+	for k in _udp_endpoints.keys():
+		var pid := int(k)
+		if pid == except_peer_id:
+			continue
+		send_udp_to(pid, packet)
+
 func broadcast(packet: NetPacket, except_peer_id: int = -1) -> void:
 	for k in _peers.keys():
 		var pid := int(k)
@@ -63,6 +98,22 @@ func _process(_delta: float) -> void:
 		return
 	_accept_new_peers()
 	_poll_peers()
+	_poll_udp()
+
+func _poll_udp() -> void:
+	while _udp.get_available_packet_count() > 0:
+		var bytes := _udp.get_packet()
+		var ip := _udp.get_packet_ip()
+		var port := _udp.get_packet_port()
+		var packet := NetPacket.from_bytes(bytes)
+		var peer_id := int(packet.payload.get("peer_id", 0))
+		# Record endpoint when client announces itself.
+		if peer_id > 0 and str(packet.payload.get("transport", "")) == "udp":
+			_udp_endpoints[peer_id] = {"ip": ip, "port": port}
+		if peer_id <= 0:
+			# Unknown sender; still surface as -1 for debugging.
+			peer_id = -1
+		emit_signal("udp_packet_received", peer_id, packet)
 
 func _accept_new_peers() -> void:
 	while _server.is_connection_available():
@@ -118,4 +169,5 @@ func _disconnect_peer(peer_id: int) -> void:
 	var peer: StreamPeerTCP = _peers[peer_id]["peer"]
 	peer.disconnect_from_host()
 	_peers.erase(peer_id)
+	_udp_endpoints.erase(peer_id)
 	emit_signal("peer_disconnected", peer_id)

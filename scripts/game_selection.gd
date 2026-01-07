@@ -9,6 +9,7 @@ extends Control
 @onready var refresh_button: TextureRect = $BoxArea/JoinPanel/RefreshButton
 
 @onready var code_text: TextEdit = $BoxArea/CodePanel/Panel/TextEdit
+@onready var code_join_button: TextureButton = $BoxArea/CodePanel/JoinButton
 
 @onready var label_create = $create
 @onready var label_join   = $join
@@ -19,6 +20,7 @@ func _ready():
 	join_list.item_clicked.connect(_on_join_list_item_clicked)
 	join_list.item_activated.connect(_on_join_list_item_activated)
 	refresh_button.gui_input.connect(_on_refresh_gui_input)
+	code_join_button.pressed.connect(_on_code_join_pressed)
 
 	# Refresh list when LAN discovery finds/loses hosts.
 	Net.lan_host_found.connect(func(_info: Dictionary): _refresh_join_list())
@@ -51,18 +53,18 @@ func _show_panel(panel_to_show: Control) -> void:
 		_exit_discovery_mode()
 
 func _on_create_pressed() -> void:
-	# LOCAL => LAN host, ONLINE => "global" host (TCP only).
-	var err: int
+	# LOCAL => LAN host. ONLINE => ask matchmaker for a private room (code).
 	if Globals.playing_online == 0:
-		err = Net.host_lan()
-	else:
-		err = Net.host_internet()
-
-	if err != OK:
-		push_error("Failed to host: %s" % error_string(err))
+		var err := Net.host_lan()
+		if err != OK:
+			push_error("Failed to host: %s" % error_string(err))
+			return
+		get_tree().change_scene_to_file("res://scenes/Lobby.tscn")
 		return
 
-	get_tree().change_scene_to_file("res://scenes/Lobby.tscn")
+	Net.private_room_created.connect(_on_private_room_created, CONNECT_ONE_SHOT)
+	Net.matchmaker_error.connect(_on_matchmaker_error)
+	Net.create_private_room("auto")
 
 var _discovery_active := false
 
@@ -90,39 +92,50 @@ func _refresh_join_list() -> void:
 
 	join_list.clear()
 
-	var entries: Array[Dictionary]
 	if Globals.playing_online == 0:
-		entries = Net.get_lan_hosts()
-	else:
-		entries = Net.get_region_servers()
+		var entries := Net.get_lan_hosts()
+		for info in entries:
+			var server_name := str(info.get("name", ""))
+			var ip := str(info.get("ip", ""))
+			var port := int(info.get("tcp_port", 0))
+			var label := "%s %s:%d" % [server_name, ip, port]
+			var idx := join_list.add_item(label)
+			join_list.set_item_metadata(idx, {"ip": ip, "tcp_port": port})
+		return
 
-	for info in entries:
-		var server_name := str(info.get("name", ""))
-		var ip := str(info.get("ip", ""))
-		var port := int(info.get("tcp_port", 0))
-		var label := "%s %s:%d" % [server_name, ip, port]
-		var idx := join_list.add_item(label)
-		join_list.set_item_metadata(idx, {"ip": ip, "tcp_port": port})
+	# ONLINE: show regions (matchmaker has fixed IP; region servers are discovered via matchmaker).
+	var regions := [
+		{"name": "NA", "region": "na"},
+		{"name": "EU", "region": "eu"},
+		{"name": "ASIA", "region": "asia"},
+	]
+	for r in regions:
+		var idx := join_list.add_item(str(r["name"]))
+		join_list.set_item_metadata(idx, {"region": str(r["region"])})
 
 func _try_join_index(index: int) -> void:
 	var meta = join_list.get_item_metadata(index)
 	if typeof(meta) != TYPE_DICTIONARY:
 		return
-	var ip := str(meta.get("ip", ""))
-	var port := int(meta.get("tcp_port", 0))
-	if ip == "" or port <= 0:
-		return
-
-	var err: int
 	if Globals.playing_online == 0:
-		err = Net.join(ip, port)
-	else:
-		err = Net.connect_global(ip, port)
-
-	if err != OK:
-		push_error("Failed to join: %s" % error_string(err))
+		var ip := str(meta.get("ip", ""))
+		var port := int(meta.get("tcp_port", 0))
+		if ip == "" or port <= 0:
+			return
+		var err := Net.join(ip, port)
+		if err != OK:
+			push_error("Failed to join: %s" % error_string(err))
+			return
+		get_tree().change_scene_to_file("res://scenes/Lobby.tscn")
 		return
-	get_tree().change_scene_to_file("res://scenes/Lobby.tscn")
+
+	# ONLINE: clicking a region does matchmaking (quick find).
+	var region := str(meta.get("region", ""))
+	if region == "":
+		return
+	Net.match_found.connect(_on_match_found, CONNECT_ONE_SHOT)
+	Net.matchmaker_error.connect(_on_matchmaker_error)
+	Net.find_match(region)
 
 func _on_join_list_item_clicked(index: int, _at_position: Vector2, mouse_button_index: int) -> void:
 	if mouse_button_index != MouseButton.MOUSE_BUTTON_LEFT:
@@ -148,3 +161,26 @@ func _refresh_discovery() -> void:
 			return
 	# ONLINE => just refresh list from region servers.
 	_refresh_join_list()
+
+func _on_code_join_pressed() -> void:
+	if Globals.playing_online == 0:
+		return
+	var code := code_text.text.strip_edges()
+	if code == "":
+		return
+	Net.connected.connect(_on_net_connected_go_lobby, CONNECT_ONE_SHOT)
+	Net.matchmaker_error.connect(_on_matchmaker_error)
+	Net.join_by_code(code)
+
+func _on_match_found(_info: Dictionary) -> void:
+	# Net.join() is called internally; wait for TCP connect then go lobby.
+	Net.connected.connect(_on_net_connected_go_lobby, CONNECT_ONE_SHOT)
+
+func _on_private_room_created(_info: Dictionary) -> void:
+	Net.connected.connect(_on_net_connected_go_lobby, CONNECT_ONE_SHOT)
+
+func _on_net_connected_go_lobby() -> void:
+	get_tree().change_scene_to_file("res://scenes/Lobby.tscn")
+
+func _on_matchmaker_error(message: String) -> void:
+	push_error("Matchmaker: %s" % message)
