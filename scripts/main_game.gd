@@ -12,7 +12,6 @@ var _kill_cd_label: Label = null
 @onready var _report_button: TextureRect = $UI/HUD/ReportButton
 @onready var _meeting_ui: Control = $UI/MeetingUI
 @onready var _meeting_button: TextureRect = $MeetingButton
-@onready var _task_label: Label = $UI/HUD/TaskCountLabel
 
 var _avatars: Dictionary = {} # peer_id -> player node
 var _accum: float = 0.0
@@ -139,21 +138,18 @@ func _physics_process(delta: float) -> void:
 	})
 	Net.send_udp(pkt)
 
-	# Update HUD task counter for local player
-	if is_instance_valid(_task_label):
-		var required_tasks: Array[String] = ["download", "keypad", "circuit_match"]
-		var done := 0
-		if Net.players.has(_my_peer_id):
-			var pd: Dictionary = Net.players[_my_peer_id]
-			var tasks: Array = pd.get("completed_tasks", [])
-			for t in required_tasks:
-				if t in tasks:
-					done += 1
-		_task_label.text = "Tasks: %d/%d" % [done, required_tasks.size()]
 
 func _on_kill_button_input(event: InputEvent) -> void:
 	if not Globals.is_imposter:
 		return
+	# Prevent killing if local player is dead.
+	if local_player != null and "is_dead" in local_player and local_player.is_dead:
+		return
+	if Net.players.has(_my_peer_id):
+		var pd: Dictionary = Net.players[_my_peer_id]
+		var alive := bool(pd.get("is_alive", true))
+		if not alive:
+			return
 	if _kill_cooldown_remaining > 0.0:
 		return
 	if event is InputEventMouseButton:
@@ -369,6 +365,10 @@ func _handle_player_kill(packet: NetPacket) -> void:
 	if victim_id == _my_peer_id:
 		if local_player != null and local_player.has_method("kill_player"):
 			local_player.call("kill_player")
+			# Hide/disable kill UI for dead local player.
+			if is_instance_valid(_kill_button):
+				_kill_button.visible = false
+				_kill_button.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	elif _avatars.has(victim_id):
 		var v: Node = _avatars[victim_id]
 		if v != null and v.has_method("kill_player"):
@@ -379,6 +379,7 @@ func _handle_player_kill(packet: NetPacket) -> void:
 		var pd: Dictionary = Net.players[victim_id]
 		pd["is_alive"] = false
 		Net.players[victim_id] = pd
+	print("kill: victim=", victim_id, " imp=", (Net.players.has(victim_id) and bool(Net.players[victim_id].get("is_imposter", false))), " killer=", killer_id)
 
 	# Move killer to victim position if killer is known on this client
 	if killer_id == _my_peer_id:
@@ -413,6 +414,7 @@ func _check_end_conditions() -> void:
 			alive_imposters += 1
 		else:
 			alive_crewmates += 1
+	print("status: alive_crewmates=", alive_crewmates, " alive_imposters=", alive_imposters)
 
 	# If no alive imposters, crewmates win
 	if alive_imposters <= 0:
@@ -458,7 +460,24 @@ func _handle_end_game(packet: NetPacket) -> void:
 	if result_scene != null:
 		var inst := result_scene.instantiate()
 		if inst is Control:
-			add_child(inst)
-			if inst.has_method("set_imposter_won"):
-				inst.call("set_imposter_won", imposter_won)
+			# Prefer attaching under UI canvas to ensure visibility.
+			var ui := get_node_or_null("UI")
+			if ui != null and ui is Node:
+				(ui as Node).add_child(inst)
+			else:
+				add_child(inst)
+			var ctrl := inst as Control
+			ctrl.z_index = 1000
+			ctrl.mouse_filter = Control.MOUSE_FILTER_STOP
+			ctrl.set_anchors_preset(Control.PRESET_FULL_RECT)
+			ctrl.anchor_left = 0
+			ctrl.anchor_right = 1
+			ctrl.anchor_top = 0
+			ctrl.anchor_bottom = 1
+			ctrl.offset_left = 0
+			ctrl.offset_right = 0
+			ctrl.offset_top = 0
+			ctrl.offset_bottom = 0
+			if ctrl.has_method("set_imposter_won"):
+				ctrl.call("set_imposter_won", imposter_won)
 			_result_shown = true
