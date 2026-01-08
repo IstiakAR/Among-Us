@@ -60,8 +60,9 @@ func open_meeting() -> void:
 	if _is_decider():
 		if _timeout_timer != null:
 			_timeout_timer = null
-		_timeout_timer = get_tree().create_timer(_timeout_seconds)
-		_timeout_timer.timeout.connect(_on_meeting_timeout)
+		if is_inside_tree() and get_tree() != null:
+			_timeout_timer = get_tree().create_timer(_timeout_seconds)
+			_timeout_timer.timeout.connect(_on_meeting_timeout)
 
 func close_meeting() -> void:
 	visible = false

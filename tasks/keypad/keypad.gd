@@ -87,7 +87,8 @@ func complete_task() -> void:
 		input_label.text = "OK"
 	else:
 		input_label.text = "ERR"
-	await get_tree().create_timer(0.5).timeout
+	if is_inside_tree() and get_tree() != null:
+		await get_tree().create_timer(0.5).timeout
 	_close_self()
 
 func _close_self() -> void:

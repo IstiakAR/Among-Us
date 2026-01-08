@@ -6,4 +6,5 @@ func _ready() -> void:
 
 func _on_texture_button_pressed() -> void:
 	Globals.playing_online = 0
-	get_tree().change_scene_to_file("res://scenes/GameSelection.tscn")
+	if is_inside_tree() and get_tree() != null:
+		get_tree().change_scene_to_file("res://scenes/GameSelection.tscn")

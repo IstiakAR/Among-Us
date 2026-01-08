@@ -9,7 +9,8 @@ func _ready():
 	switch_node.mouse_filter = Control.MOUSE_FILTER_STOP
 	switch_node.gui_input.connect(_on_switch_gui_input)
 
-	await get_tree().process_frame
+	if is_inside_tree() and get_tree() != null:
+		await get_tree().process_frame
 	switch_node.pivot_offset = switch_node.size / 2
 
 	_set_vertical()
@@ -40,8 +41,10 @@ func flip_to_horizontal():
 
 	tween.finished.connect(complete_circuit)
 
+
 func complete_circuit():
-	await get_tree().create_timer(0.4).timeout
+	if is_inside_tree() and get_tree() != null:
+		await get_tree().create_timer(0.4).timeout
 	_close_self()
 
 func _close_self():

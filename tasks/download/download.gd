@@ -37,7 +37,8 @@ func complete_task() -> void:
 	label.text = "Complete"
 
 	# Optionally give a short delay so player sees "Complete"
-	await get_tree().create_timer(0.5).timeout
+	if is_inside_tree() and get_tree() != null:
+		await get_tree().create_timer(0.5).timeout
 
 	_close_self()
 

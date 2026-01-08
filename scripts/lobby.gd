@@ -7,6 +7,7 @@ extends Control
 @onready var start_button: TextureRect = $UI/HUD/StartButton
 @onready var countdown_label: Label = $UI/HUD/CountdownLabel
 @onready var join_code_label: Label = $UI/HUD/JoinCode
+@onready var debug_label: Label = $UI/HUD/DebugLabel
 var _player_scene: PackedScene = preload("res://scenes/Player.tscn")
 
 # peer_id -> player node
@@ -124,6 +125,9 @@ func _physics_process(delta: float) -> void:
 	Net.send_udp(pkt)
 
 func _process(delta: float) -> void:
+	# Update debug metrics label
+	_update_debug_label()
+
 	if not _game_starting:
 		return
 	_countdown_left -= delta
@@ -132,7 +136,31 @@ func _process(delta: float) -> void:
 		countdown_label.text = "Starting in %d" % secs_left
 	if _countdown_left <= 0.0:
 		_game_starting = false
-		get_tree().change_scene_to_file("res://scenes/Main_Game.tscn")
+		if is_inside_tree() and get_tree() != null:
+			get_tree().change_scene_to_file("res://scenes/Main_Game.tscn")
+
+func _update_debug_label() -> void:
+	if not is_instance_valid(debug_label):
+		return
+	var mode := Net.mode
+	var players := int(Net.players.size())
+	var text := "Mode: %s | Players: %d" % [mode, players]
+	if mode == "client" and Net.client != null and Net.client.has_method("get_metrics"):
+		var m: Dictionary = Net.client.call("get_metrics")
+		var tcp_rtt := float(m.get("tcp_rtt_ms", -1.0))
+		var tcp_jit := float(m.get("tcp_jitter_ms", 0.0))
+		var udp_rtt := float(m.get("udp_rtt_ms", -1.0))
+		var udp_jit := float(m.get("udp_jitter_ms", 0.0))
+		var udp_ready := bool(m.get("udp_ready", false))
+		var tcp_rtt_str := (String.num(tcp_rtt, 1) if tcp_rtt >= 0.0 else "n/a")
+		var udp_rtt_str := (String.num(udp_rtt, 1) if udp_rtt >= 0.0 else "n/a")
+		var udp_ready_str := ("ready" if udp_ready else "n/a")
+		text += "\nTCP RTT: %s ms | Jit: %s ms" % [tcp_rtt_str, String.num(tcp_jit, 1)]
+		text += "\nUDP: %s | RTT: %s ms | Jit: %s ms" % [udp_ready_str, udp_rtt_str, String.num(udp_jit, 1)]
+	else:
+		# Host/dedicated: show basic info
+		text += "\nHosting on port %d" % Net.tcp_port
+	debug_label.text = text
 
 func _on_tcp_packet(_from_peer_id: int, packet: NetPacket) -> void:
 	match packet.type:

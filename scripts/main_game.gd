@@ -12,6 +12,7 @@ var _kill_cd_label: Label = null
 @onready var _report_button: TextureRect = $UI/HUD/ReportButton
 @onready var _meeting_ui: Control = $UI/MeetingUI
 @onready var _meeting_button: TextureRect = $MeetingButton
+@onready var _debug_label: Label = $UI/HUD/DebugLabel
 
 var _avatars: Dictionary = {} # peer_id -> player node
 var _accum: float = 0.0
@@ -138,6 +139,9 @@ func _physics_process(delta: float) -> void:
 	})
 	Net.send_udp(pkt)
 
+func _process(_delta: float) -> void:
+	_update_debug_label()
+
 
 func _on_kill_button_input(event: InputEvent) -> void:
 	if not Globals.is_imposter:
@@ -230,6 +234,28 @@ func _on_tcp_packet(_from_peer_id: int, packet: NetPacket) -> void:
 			_handle_end_game(packet)
 		_:
 			pass
+
+func _update_debug_label() -> void:
+	if not is_instance_valid(_debug_label):
+		return
+	var mode := Net.mode
+	var players := int(Net.players.size())
+	var text := "Mode: %s | Players: %d" % [mode, players]
+	if mode == "client" and Net.client != null and Net.client.has_method("get_metrics"):
+		var m: Dictionary = Net.client.call("get_metrics")
+		var tcp_rtt := float(m.get("tcp_rtt_ms", -1.0))
+		var tcp_jit := float(m.get("tcp_jitter_ms", 0.0))
+		var udp_rtt := float(m.get("udp_rtt_ms", -1.0))
+		var udp_jit := float(m.get("udp_jitter_ms", 0.0))
+		var udp_ready := bool(m.get("udp_ready", false))
+		var tcp_rtt_str := (String.num(tcp_rtt, 1) if tcp_rtt >= 0.0 else "n/a")
+		var udp_rtt_str := (String.num(udp_rtt, 1) if udp_rtt >= 0.0 else "n/a")
+		var udp_ready_str := ("ready" if udp_ready else "n/a")
+		text += "\nTCP RTT: %s ms | Jit: %s ms" % [tcp_rtt_str, String.num(tcp_jit, 1)]
+		text += "\nUDP: %s | RTT: %s ms | Jit: %s ms" % [udp_ready_str, udp_rtt_str, String.num(udp_jit, 1)]
+	else:
+		text += "\nHosting on port %d" % Net.tcp_port
+	_debug_label.text = text
 
 func _handle_player_join(packet: NetPacket) -> void:
 	var pd: Variant = packet.payload.get("player", null)

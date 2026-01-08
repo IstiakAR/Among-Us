@@ -67,7 +67,8 @@ func _on_create_pressed() -> void:
 		if err != OK:
 			push_error("Failed to host: %s" % error_string(err))
 			return
-		get_tree().change_scene_to_file("res://scenes/Lobby.tscn")
+		if is_inside_tree() and get_tree() != null:
+			get_tree().change_scene_to_file("res://scenes/Lobby.tscn")
 		return
 
 	if not Net.private_room_created.is_connected(_on_private_room_created):
@@ -144,7 +145,8 @@ func _try_join_index(index: int) -> void:
 	if err != OK:
 		push_error("Failed to join: %s" % error_string(err))
 		return
-	get_tree().change_scene_to_file("res://scenes/Lobby.tscn")
+	if is_inside_tree() and get_tree() != null:
+		get_tree().change_scene_to_file("res://scenes/Lobby.tscn")
 
 func _on_join_list_item_clicked(index: int, _at_position: Vector2, mouse_button_index: int) -> void:
 	if mouse_button_index != MouseButton.MOUSE_BUTTON_LEFT:
@@ -196,7 +198,8 @@ func _on_private_room_created(_info: Dictionary) -> void:
 		Net.connected.connect(_on_net_connected_go_lobby, CONNECT_ONE_SHOT)
 
 func _on_net_connected_go_lobby() -> void:
-	get_tree().change_scene_to_file("res://scenes/Lobby.tscn")
+	if is_inside_tree() and get_tree() != null:
+		get_tree().change_scene_to_file("res://scenes/Lobby.tscn")
 
 func _on_matchmaker_error(message: String) -> void:
 	push_error("Matchmaker: %s" % message)

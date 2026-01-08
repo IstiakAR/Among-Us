@@ -117,6 +117,12 @@ func _poll_udp() -> void:
 		if peer_id <= 0:
 			# Unknown sender; still surface as -1 for debugging.
 			peer_id = -1
+
+		# Respond to UDP PING with PONG echo including original timestamp.
+		if packet.type == PacketType.Type.PING and peer_id > 0:
+			var ts := int(packet.payload.get("ts", 0))
+			var pong := NetPacket.new(PacketType.Type.PONG, {"peer_id": peer_id, "ts": ts, "transport": "udp"})
+			send_udp_to(peer_id, pong)
 		emit_signal("udp_packet_received", peer_id, packet)
 
 func _accept_new_peers() -> void:
@@ -162,6 +168,11 @@ func _poll_peers() -> void:
 			_peers[peer_id]["buffer"] = unpacked["remaining"]
 			for frame_bytes in unpacked["frames"]:
 				var packet := NetPacket.from_bytes(frame_bytes)
+				# Respond to TCP PING with PONG echo including original timestamp.
+				if packet.type == PacketType.Type.PING:
+					var ts := int(packet.payload.get("ts", 0))
+					var pong := NetPacket.new(PacketType.Type.PONG, {"peer_id": peer_id, "ts": ts, "transport": "tcp"})
+					send_to(peer_id, pong)
 				emit_signal("packet_received", peer_id, packet)
 
 	for peer_id in to_drop:
