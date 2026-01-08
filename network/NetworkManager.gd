@@ -103,7 +103,8 @@ func _process(delta: float) -> void:
 				print("empty room timeout reached; shutting down dedicated room")
 				lan.stop()
 				server.stop()
-				get_tree().quit()
+				if is_inside_tree() and get_tree() != null:
+					get_tree().quit()
 		else:
 			_empty_accum = 0.0
 

@@ -13,6 +13,8 @@ func set_task_ui(ui: Control) -> void:
 func _resolve_task_ui() -> Control:
 	if is_instance_valid(_task_ui):
 		return _task_ui
+	if not is_inside_tree() or get_tree() == null:
+		return null
 	var scene := get_tree().current_scene
 	if scene == null:
 		return null
