@@ -43,6 +43,8 @@ var players: Dictionary = {}
 
 var _color_palette: Array[Color] = []
 var _rng := RandomNumberGenerator.new()
+@export var empty_lobby_timeout_seconds: float = 30.0
+var _empty_accum: float = 0.0
 
 func _ready() -> void:
 	server = GameServer.new()
@@ -90,6 +92,20 @@ func _ready() -> void:
 		var err := host_internet()
 		if err != OK:
 			push_error("Dedicated server failed to start: %s" % error_string(err))
+
+func _process(delta: float) -> void:
+	# Auto-terminate dedicated/headless rooms that stay empty.
+	if mode == "host" and (OS.has_feature("headless") or _has_cmdline_flag("--dedicated")):
+		var active_players := players.size()
+		if active_players <= 0:
+			_empty_accum += delta
+			if _empty_accum >= maxf(empty_lobby_timeout_seconds, 0.0):
+				print("empty room timeout reached; shutting down dedicated room")
+				lan.stop()
+				server.stop()
+				get_tree().quit()
+		else:
+			_empty_accum = 0.0
 
 func host_lan() -> Error:
 	disconnect_all()

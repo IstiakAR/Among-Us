@@ -1,16 +1,16 @@
-[gd_scene load_steps=2 format=3 uid="uid://c8a878snie6h1"]
+[gd_scene load_steps=3 format=3 uid="uid://c8a878snie6h1"]
 
 [ext_resource type="FontFile" uid="uid://btrfdqxm27o00" path="res://assets/VCR_OSD_MONO_1.001.ttf" id="1_n8ln0"]
-[ext_resource type="Script" path="res://scripts/result.gd" id="2_result"]
+[ext_resource type="Script" uid="uid://bjri0nc5gyf4x" path="res://scripts/result.gd" id="2_result"]
 
 [node name="Result" type="Control"]
-script = ExtResource("2_result")
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("2_result")
 
 [node name="ColorRect" type="ColorRect" parent="."]
 layout_mode = 1

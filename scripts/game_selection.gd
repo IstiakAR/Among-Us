@@ -185,8 +185,13 @@ func _on_match_found(_info: Dictionary) -> void:
 	# Net.join() is called internally; wait for TCP connect then go lobby.
 	if not Net.connected.is_connected(_on_net_connected_go_lobby):
 		Net.connected.connect(_on_net_connected_go_lobby, CONNECT_ONE_SHOT)
+	var code := str(_info.get("code", "")).strip_edges()
+	if code != "":
+		Globals.room_code = code
 
 func _on_private_room_created(_info: Dictionary) -> void:
+	var code := str(_info.get("code", "")).strip_edges()
+	Globals.room_code = code
 	if not Net.connected.is_connected(_on_net_connected_go_lobby):
 		Net.connected.connect(_on_net_connected_go_lobby, CONNECT_ONE_SHOT)
 

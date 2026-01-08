@@ -6,6 +6,7 @@ extends Control
 @onready var local_player: CharacterBody2D = $Player
 @onready var start_button: TextureRect = $UI/HUD/StartButton
 @onready var countdown_label: Label = $UI/HUD/CountdownLabel
+@onready var join_code_label: Label = $UI/HUD/JoinCode
 var _player_scene: PackedScene = preload("res://scenes/Player.tscn")
 
 # peer_id -> player node
@@ -33,6 +34,7 @@ func _ready() -> void:
 		_setup_local_player()
 		_sync_from_net_players()
 		_update_start_button_visibility()
+		_update_join_code()
 		return
 
 	# If the client already has a peer id (scene loaded late), sync now.
@@ -41,6 +43,7 @@ func _ready() -> void:
 		_setup_local_player()
 		_sync_from_net_players()
 		_update_start_button_visibility()
+		_update_join_code()
 
 func _on_net_connected() -> void:
 	# Client receives peer id after WELCOME.
@@ -48,6 +51,17 @@ func _on_net_connected() -> void:
 	_setup_local_player()
 	_sync_from_net_players()
 	_update_start_button_visibility()
+	_update_join_code()
+
+func _update_join_code() -> void:
+	if not is_instance_valid(join_code_label):
+		return
+	var code := str(Globals.room_code)
+	if Globals.playing_online != 0 and code != "":
+		join_code_label.visible = true
+		join_code_label.text = code
+	else:
+		join_code_label.visible = false
 
 func _update_start_button_visibility() -> void:
 	if not is_instance_valid(start_button):
