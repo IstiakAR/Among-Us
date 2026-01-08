@@ -1,14 +1,7 @@
 extends SceneTree
 
-# TCP newline-JSON matchmaker server (GDScript).
-#
-# Protocol matches services/matchmaker_server.py and network/MatchmakerClient.gd.
-#
 # Run (using a Godot executable):
 #   godot4 --headless --script res://services_gd/matchmaker_server.gd -- --host=0.0.0.0 --port=5000
-#
-# Notes:
-# - This is a long-running script; it will keep the process alive.
 
 class Conn:
 	var id: int

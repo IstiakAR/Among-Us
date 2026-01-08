@@ -46,5 +46,13 @@ func complete_task():
 		ui.close_task()
 	if PlayerRef.player_instance != null:
 		PlayerRef.player_instance.set_physics_process(true)
+	# Broadcast task completion to host/peers
+	var my_id := 1 if Net.mode == "host" else Net.my_peer_id
+	if my_id > 0:
+		var pkt := NetPacket.new(PacketType.Type.TASK_COMPLETE, {
+			"from_id": my_id,
+			"task_id": current_task,
+		})
+		Net.send(pkt)
 	current_task = ""
 	task_completed.emit()

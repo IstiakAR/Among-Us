@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://g0ip54a3pf0j"]
+[gd_scene load_steps=25 format=3 uid="uid://g0ip54a3pf0j"]
 
 [ext_resource type="Script" uid="uid://pw1a3ljh8agu" path="res://scripts/main_game.gd" id="1_7h5k3"]
 [ext_resource type="Texture2D" uid="uid://dlblxq1g72dih" path="res://assets/Map.png" id="1_e7ka0"]
@@ -10,9 +10,9 @@
 [ext_resource type="PackedScene" uid="uid://cmsjliko6b837" path="res://tasks/download/download.tscn" id="8_3v32i"]
 [ext_resource type="PackedScene" uid="uid://c742duasnhyfs" path="res://tasks/circuit_match/circuit_match.tscn" id="9_qmn38"]
 [ext_resource type="Texture2D" uid="uid://cf5l2tpbcne2c" path="res://assets/Buttons.png" id="10_buttons"]
-[ext_resource type="PackedScene" path="res://scenes/MeetingUI.tscn" id="11_meet"]
 [ext_resource type="Texture2D" uid="uid://b3xmk08bxvwyf" path="res://assets/tasks_add.png" id="10_dkv1d"]
-[ext_resource type="Script" uid="uid://djtr7jjvpekh0" path="res://scenes/task_1.gd" id="11_c56jd"]
+[ext_resource type="PackedScene" uid="uid://cuw5dyw6cdtxd" path="res://scenes/MeetingUI.tscn" id="11_meet"]
+[ext_resource type="Script" uid="uid://cw44pecuo72ca" path="res://scripts/task_area.gd" id="12_taskarea"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_fcw3y"]
 atlas = ExtResource("1_e7ka0")
@@ -36,9 +36,24 @@ region = Rect2(921.2712, 120.37084, 110.86041, 110.86039)
 atlas = ExtResource("10_buttons")
 region = Rect2(1151.2358, 111.70988, 109.128174, 110.860405)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_nlmqu"]
+atlas = ExtResource("10_dkv1d")
+region = Rect2(702.1588, 527.5893, 47.15735, 38.872925)
+
 [sub_resource type="AtlasTexture" id="AtlasTexture_x4vn4"]
 atlas = ExtResource("10_dkv1d")
 region = Rect2(76, 128.5, 36, 30)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_eksh0"]
+atlas = ExtResource("10_dkv1d")
+region = Rect2(533.3899, 605.976, 56.00714, 60.78827)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_17bgp"]
+atlas = ExtResource("10_dkv1d")
+region = Rect2(758.5167, 550.8727, 30.110962, 20.35675)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_task"]
+radius = 50.0
 
 [node name="MainGame" type="Node2D"]
 script = ExtResource("1_7h5k3")
@@ -119,10 +134,13 @@ debug_color = Color(0.8463229, 0.34603623, 0.4050455, 0.41960785)
 polygon = PackedVector2Array(1470, 236, 1634, 74, 2159, 74, 2399, 314, 2398, 438, 2576, 439, 2577, 431, 2633, 431, 2639, 396, 2668, 351, 2677, 342, 2678, 259, 2776, 258, 2876, 355, 2952, 430, 2959, 439, 2876, 438, 2870, 471, 2847, 516, 2839, 521, 2841, 651, 2841, 826, 3032, 823, 3033, 939, 3283, 934, 3292, 818, 3445, 815, 3576, 922, 3581, 1026, 3449, 1141, 3293, 1141, 3287, 1030, 3046, 1024, 3046, 1173, 2844, 1172, 2843, 1453, 2956, 1457, 2956, 1504, 2956, 1488, 2837, 1490, 2834, 1528, 2864, 1570, 2871, 1604, 2872, 1643, 2860, 1681, 2839, 1709, 2840, 1765, 2777, 1829, 2576, 1830, 2574, 1667, 2484, 1666, 2484, 1729, 2534, 1729, 2480, 1737, 2479, 1794, 2528, 1795, 2529, 1967, 2448, 2049, 2199, 2048, 2111, 1968, 2114, 1818, 2239, 1818, 2239, 1814, 2326, 1814, 2334, 1805, 2335, 1795, 2352, 1797, 2350, 1663, 2066, 1663, 2068, 2047, 1735, 2048, 1685, 1999, 1560, 1876, 1561, 1854, 909, 1855, 909, 1624, 743, 1624, 743, 1752, 451, 1758, 340, 1674, 340, 1648, 345, 1632, 349, 1384, 506, 1383, 504, 1085, 373, 1085, 373, 1194, 240, 1194, 241, 1334, 153, 1335, 12, 1238, 12, 822, 159, 728, 243, 728, 243, 864, 378, 864, 375, 985, 500, 980, 500, 708, 346, 705, 346, 412, 454, 337, 739, 333, 742, 437, 1468, 437, 1468, 352, 1468, 241, 991, 89, 125, 96, -90, 727, -114, 1116, 128, 2057, 1386, 2368, 3525.2886, 1987.1206, 3672, 1961, 4279, 836, 3361, 125, 2555, -326, 1415, -230)
 
 [node name="InsideCollisionLeft" type="CollisionPolygon2D" parent="Map/StaticBody2D"]
-polygon = PackedVector2Array(771, 985, 737, 985, 738, 999, 616, 999, 617, 737, 633, 739, 633, 705, 670, 705, 669, 698, 713, 696, 713, 704, 737, 705, 738, 536, 1152, 535, 1150, 656, 1050, 656, 1050, 975, 1114, 1052, 1540, 1055, 1541, 1018, 1398, 878, 1397, 657, 1277, 658, 1277, 536, 1471, 536, 1472, 734, 1677, 942, 1867, 941, 1866, 1266, 1867, 1345, 1745, 1345, 1740, 1377, 1696, 1394, 1686.7549, 1384.5564, 1687, 1400, 1670, 1411, 1656, 1405, 1658, 1422, 1642, 1435, 1612, 1435, 1613, 1471, 1602, 1485, 1578, 1485, 1563, 1475, 1564, 1757, 1251, 1758, 1252, 1623, 1365, 1623, 1451, 1537, 1451, 1373, 1547, 1276, 1547, 1262, 1259, 1262, 1257, 1234, 1142, 1234, 1133, 1754, 1040, 1754, 1038, 1519, 739, 1518, 739, 1389, 666, 1389, 635, 1387, 634, 1348, 615, 1350, 616, 1086, 770, 1084, 770, 1115, 782, 1118, 782, 1186, 975, 1187, 975, 1120, 985.9999, 1117.0825, 986, 871, 926, 809, 847, 809, 771, 884)
+polygon = PackedVector2Array(771, 985, 737, 985, 738, 999, 616, 999, 617, 737, 633, 739, 633, 705, 670, 705, 669, 698, 713, 696, 713, 704, 737, 705, 738, 536, 1152, 535, 1150, 656, 1050, 656, 1050, 975, 1114, 1052, 1540, 1055, 1541, 1018, 1398, 878, 1397, 657, 1277, 658, 1277, 536, 1471, 536, 1472, 734, 1677, 942, 1867, 941, 1866, 1266, 1867, 1345, 1745, 1345, 1740, 1377, 1696, 1394, 1686.7549, 1384.5564, 1687, 1400, 1670, 1411, 1656, 1405, 1658, 1422, 1642, 1435, 1612, 1435, 1613, 1471, 1602, 1485, 1578, 1485, 1563, 1475, 1564, 1757, 1251, 1758, 1252, 1623, 1365, 1623, 1451, 1537, 1451, 1373, 1547, 1276, 1547, 1262, 1259, 1262, 1257, 1234, 1142, 1234, 1139.7494, 1364.0385, 1355, 1364, 1355, 1461, 1142, 1460, 1141, 1715, 1131, 1715, 1131, 1753, 1040, 1754, 1038, 1519, 739, 1518, 739, 1389, 666, 1389, 635, 1387, 634, 1348, 615, 1350, 616, 1086, 770, 1084, 770, 1115, 782, 1118, 782, 1186, 975, 1187, 975, 1120, 985.9999, 1117.0825, 986, 871, 926, 809, 847, 809, 771, 884)
 
 [node name="InsideCollsionRight" type="CollisionPolygon2D" parent="Map/StaticBody2D"]
-polygon = PackedVector2Array(1995, 943, 2186, 943, 2399, 731, 2400, 539, 2685, 538, 2717, 555, 2713, 637, 2713, 672, 2712, 747, 2712, 818, 2489, 820, 2453, 861, 2416, 861, 2330, 947, 2356, 933, 2383, 941, 2386, 963, 2634, 963, 2635, 1005, 2636, 917, 2912, 918, 2914, 1075, 2713, 1075, 2710, 1384, 2711, 1511, 2680, 1530, 2651, 1560, 2512, 1562, 2068, 1562, 2068, 1363, 2070, 1343, 1997, 1343, 1996, 1219, 2152, 1222, 2154, 1442, 2491, 1445, 2564, 1372, 2569, 1131, 1996, 1132)
+polygon = PackedVector2Array(1995, 943, 2186, 943, 2399, 731, 2400, 539, 2685, 538, 2717, 555, 2713, 637, 2713, 672, 2712, 747, 2712, 818, 2489, 820, 2453, 861, 2416, 861, 2330, 947, 2356, 933, 2383, 941, 2386, 963, 2452.0667, 963.00006, 2453, 948, 2462, 937, 2476, 933, 2495, 935, 2502, 944, 2506, 957, 2506, 962, 2573.3345, 962.5261, 2573, 955, 2576, 945, 2583, 937, 2599, 933, 2609, 935, 2619, 939, 2623.975, 946.95996, 2628, 962, 2634, 963, 2635, 1005, 2636, 917, 2912, 918, 2914, 1075, 2713, 1075, 2710, 1384, 2711, 1511, 2680, 1530, 2651, 1560, 2512, 1562, 2068, 1562, 2068, 1363, 2070, 1343, 1997, 1343, 1996, 1219, 2152, 1222, 2154, 1442, 2491, 1445, 2564, 1372, 2569, 1131, 1996, 1132)
+
+[node name="CollisionShape2D6" type="CollisionPolygon2D" parent="Map/StaticBody2D"]
+polygon = PackedVector2Array(1649, 1627, 1681, 1599, 1721, 1618, 1722, 1534, 1748, 1533, 1780, 1522, 1788, 1529, 1828, 1495, 1858, 1508, 1964, 1508, 1966, 1672, 1975, 1687, 1976, 1721, 1970, 1725, 1962, 1730, 1946, 1730, 1938, 1725, 1938, 1771, 1895, 1771, 1895, 1795, 1858, 1828, 1800, 1807, 1800, 1773, 1778, 1773, 1778, 1725, 1721, 1725, 1721, 1667, 1696, 1690, 1651, 1673, 1649, 1629)
 
 [node name="Player" parent="." instance=ExtResource("3_nbsk6")]
 position = Vector2(1811, 631)
@@ -197,12 +215,190 @@ offset_right = 1141.0
 offset_bottom = 633.0
 texture = SubResource("AtlasTexture_use")
 
+[node name="TaskCountLabel" type="Label" parent="UI/HUD"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 540.0
+offset_right = 220.0
+offset_bottom = 570.0
+text = "Tasks: 0/3"
+horizontal_alignment = 0
+
 [node name="MeetingUI" parent="UI" instance=ExtResource("11_meet")]
 visible = false
-[node name="task1" type="TextureRect" parent="."]
+
+[node name="MeetingButton" type="TextureRect" parent="."]
+offset_left = 1891.0
+offset_top = 463.0
+offset_right = 1938.0
+offset_bottom = 501.0
+texture = SubResource("AtlasTexture_nlmqu")
+
+[node name="DownloadButtons" type="Node" parent="."]
+
+[node name="DownloadButton" type="TextureRect" parent="DownloadButtons"]
 offset_left = 2182.0
 offset_top = 1089.0
 offset_right = 2218.0
 offset_bottom = 1119.0
 texture = SubResource("AtlasTexture_x4vn4")
-script = ExtResource("11_c56jd")
+
+[node name="DownloadButton2" type="TextureRect" parent="DownloadButtons"]
+offset_left = 2715.0
+offset_top = 215.0
+offset_right = 2751.0
+offset_bottom = 245.0
+texture = SubResource("AtlasTexture_x4vn4")
+
+[node name="DownloadButton4" type="TextureRect" parent="DownloadButtons"]
+offset_left = 1179.0
+offset_top = 1180.0
+offset_right = 1215.0
+offset_bottom = 1210.0
+texture = SubResource("AtlasTexture_x4vn4")
+
+[node name="DownloadButton5" type="TextureRect" parent="DownloadButtons"]
+offset_left = 868.0
+offset_top = 767.0
+offset_right = 904.0
+offset_bottom = 797.0
+texture = SubResource("AtlasTexture_x4vn4")
+
+[node name="KeypadButtons" type="Node" parent="."]
+
+[node name="KeypadButton" type="TextureRect" parent="KeypadButtons"]
+offset_left = 1519.0
+offset_top = 104.0
+offset_right = 1575.0
+offset_bottom = 164.0
+texture = SubResource("AtlasTexture_eksh0")
+
+[node name="KeypadButton2" type="TextureRect" parent="KeypadButtons"]
+offset_left = 2369.0
+offset_top = 832.0
+offset_right = 2425.0
+offset_bottom = 892.0
+texture = SubResource("AtlasTexture_eksh0")
+
+[node name="KeypadButton3" type="TextureRect" parent="KeypadButtons"]
+offset_left = 57.0
+offset_top = 716.0
+offset_right = 113.0
+offset_bottom = 776.0
+texture = SubResource("AtlasTexture_eksh0")
+
+[node name="CircuitButtons" type="Node" parent="."]
+
+[node name="CircuitButton" type="TextureRect" parent="CircuitButtons"]
+offset_left = 1822.0
+offset_top = 1302.0
+offset_right = 1852.0
+offset_bottom = 1322.0
+texture = SubResource("AtlasTexture_17bgp")
+
+[node name="CircuitButton2" type="TextureRect" parent="CircuitButtons"]
+offset_left = 1326.0
+offset_top = 1215.0
+offset_right = 1356.0
+offset_bottom = 1235.0
+texture = SubResource("AtlasTexture_17bgp")
+
+[node name="CircuitButton3" type="TextureRect" parent="CircuitButtons"]
+offset_left = 2518.0
+offset_top = 1100.0
+offset_right = 2548.0
+offset_bottom = 1120.0
+texture = SubResource("AtlasTexture_17bgp")
+
+[node name="CircuitButton4" type="TextureRect" parent="CircuitButtons"]
+offset_left = 3372.0
+offset_top = 777.0
+offset_right = 3402.0
+offset_bottom = 797.0
+texture = SubResource("AtlasTexture_17bgp")
+
+[node name="TaskAreas" type="Node" parent="."]
+
+[node name="TaskDownload1" type="Area2D" parent="TaskAreas"]
+position = Vector2(2200, 1104)
+script = ExtResource("12_taskarea")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TaskAreas/TaskDownload1"]
+shape = SubResource("CircleShape2D_task")
+
+[node name="TaskDownload2" type="Area2D" parent="TaskAreas"]
+position = Vector2(2733, 230)
+script = ExtResource("12_taskarea")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TaskAreas/TaskDownload2"]
+shape = SubResource("CircleShape2D_task")
+
+[node name="TaskDownload4" type="Area2D" parent="TaskAreas"]
+position = Vector2(1197, 1195)
+script = ExtResource("12_taskarea")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TaskAreas/TaskDownload4"]
+shape = SubResource("CircleShape2D_task")
+
+[node name="TaskDownload5" type="Area2D" parent="TaskAreas"]
+position = Vector2(886, 782)
+script = ExtResource("12_taskarea")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TaskAreas/TaskDownload5"]
+shape = SubResource("CircleShape2D_task")
+
+[node name="TaskKeypad1" type="Area2D" parent="TaskAreas"]
+position = Vector2(1547, 134)
+script = ExtResource("12_taskarea")
+task_id = "keypad"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TaskAreas/TaskKeypad1"]
+shape = SubResource("CircleShape2D_task")
+
+[node name="TaskKeypad2" type="Area2D" parent="TaskAreas"]
+position = Vector2(2397, 862)
+script = ExtResource("12_taskarea")
+task_id = "keypad"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TaskAreas/TaskKeypad2"]
+shape = SubResource("CircleShape2D_task")
+
+[node name="TaskKeypad3" type="Area2D" parent="TaskAreas"]
+position = Vector2(85, 746)
+script = ExtResource("12_taskarea")
+task_id = "keypad"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TaskAreas/TaskKeypad3"]
+shape = SubResource("CircleShape2D_task")
+
+[node name="TaskCircuit1" type="Area2D" parent="TaskAreas"]
+position = Vector2(1837, 1312)
+script = ExtResource("12_taskarea")
+task_id = "circuit_match"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TaskAreas/TaskCircuit1"]
+shape = SubResource("CircleShape2D_task")
+
+[node name="TaskCircuit2" type="Area2D" parent="TaskAreas"]
+position = Vector2(1341, 1225)
+script = ExtResource("12_taskarea")
+task_id = "circuit_match"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TaskAreas/TaskCircuit2"]
+shape = SubResource("CircleShape2D_task")
+
+[node name="TaskCircuit3" type="Area2D" parent="TaskAreas"]
+position = Vector2(2533, 1110)
+script = ExtResource("12_taskarea")
+task_id = "circuit_match"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TaskAreas/TaskCircuit3"]
+shape = SubResource("CircleShape2D_task")
+
+[node name="TaskCircuit4" type="Area2D" parent="TaskAreas"]
+position = Vector2(3387, 787)
+script = ExtResource("12_taskarea")
+task_id = "circuit_match"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TaskAreas/TaskCircuit4"]
+shape = SubResource("CircleShape2D_task")

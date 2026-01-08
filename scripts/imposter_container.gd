@@ -19,3 +19,8 @@ func _on_label_click(event: InputEvent, label: Label) -> void:
 		for l in labels:
 			l.modulate = default_color
 		label.modulate = selected_color
+		# Update imposters_count in Globals based on selected label.
+		var idx := labels.find(label)
+		if idx >= 0:
+			# labels index 0..2 corresponds to 1..3 imposters
+			Globals.imposters_count = idx + 1

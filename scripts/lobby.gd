@@ -145,32 +145,74 @@ func _on_start_button_gui_input(event: InputEvent) -> void:
 	if _game_starting:
 		return
 
-	_imposter_peer_id = _pick_random_imposter_peer_id()
+	# Enforce minimum players: total >= 3 * imposters + 1 (1 imposter => >=4 players)
+	var imposters: int = max(1, int(Globals.imposters_count))
+	var min_players: int = 3 * imposters + 1
+	var total_players: int = int(Net.players.size())
+	if total_players < min_players:
+		if is_instance_valid(countdown_label):
+			countdown_label.visible = true
+			countdown_label.text = "Need at least %d players" % min_players
+		return
+
+	# Choose multiple imposters and broadcast them.
+	var max_imps: int = min(imposters, total_players)
+	var chosen_imps: Array[int] = _pick_random_imposter_peer_ids(max_imps)
+	# Mark locally for host so UI/logic reflect roles immediately.
+	for id in chosen_imps:
+		if Net.players.has(id):
+			var pd: Dictionary = Net.players[id]
+			pd["is_imposter"] = true
+			Net.players[id] = pd
+	_imposter_peer_id = (chosen_imps[0] if chosen_imps.size() > 0 else 0)
 	var pkt := NetPacket.new(PacketType.Type.START_GAME, {
 		"countdown": start_countdown_seconds,
+		"imposter_peer_ids": chosen_imps,
+		# Back-compat single field
 		"imposter_peer_id": _imposter_peer_id,
 	})
 	Net.send(pkt)
-	_begin_countdown(start_countdown_seconds, _imposter_peer_id)
+	_begin_countdown(start_countdown_seconds, chosen_imps)
 	if is_instance_valid(start_button):
 		start_button.visible = false
 
 func _handle_start_game(packet: NetPacket) -> void:
 	# Host already started locally; clients start when receiving this.
 	var seconds := float(packet.payload.get("countdown", start_countdown_seconds))
-	var imposter_id := int(packet.payload.get("imposter_peer_id", 0))
-	if imposter_id <= 0:
-		imposter_id = _pick_random_imposter_peer_id()
-	_imposter_peer_id = imposter_id
-	_begin_countdown(seconds, imposter_id)
+	var imp_ids: Array[int] = []
+	var raw_ids: Array = packet.payload.get("imposter_peer_ids", [])
+	if raw_ids.is_empty():
+		var single: int = int(packet.payload.get("imposter_peer_id", 0))
+		if single > 0:
+			imp_ids = [single]
+		else:
+			imp_ids = _pick_random_imposter_peer_ids(1)
+	else:
+		for v in raw_ids:
+			imp_ids.append(int(v))
+	# Mark the selected imposters in the local players dictionary so UIs reflect roles.
+	for id in imp_ids:
+		if Net.players.has(id):
+			var pd: Dictionary = Net.players[id]
+			pd["is_imposter"] = true
+			Net.players[id] = pd
+	_imposter_peer_id = (imp_ids[0] if imp_ids.size() > 0 else 0)
+	_begin_countdown(seconds, imp_ids)
 	if is_instance_valid(start_button):
 		start_button.visible = false
 
-func _begin_countdown(seconds: float, imposter_id: int) -> void:
+func _begin_countdown(seconds: float, imposter_ids: Array[int]) -> void:
 	_game_starting = true
 	_countdown_left = maxf(seconds, 0.0)
-	Globals.imposter_peer_id = imposter_id
-	Globals.is_imposter = (_my_peer_id > 0 and _my_peer_id == imposter_id)
+	Globals.imposter_peer_ids = imposter_ids.duplicate()
+	Globals.imposter_peer_id = (imposter_ids[0] if imposter_ids.size() > 0 else 0)
+	Globals.is_imposter = (_my_peer_id > 0 and imposter_ids.has(_my_peer_id))
+	# Ensure local dictionary records all chosen imposter roles.
+	for id in imposter_ids:
+		if Net.players.has(id):
+			var pd: Dictionary = Net.players[id]
+			pd["is_imposter"] = true
+			Net.players[id] = pd
 	if is_instance_valid(countdown_label):
 		countdown_label.visible = true
 		countdown_label.text = "Starting in %d" % int(ceili(_countdown_left))
@@ -183,6 +225,17 @@ func _pick_random_imposter_peer_id() -> int:
 	if ids.is_empty():
 		return _my_peer_id if _my_peer_id > 0 else 1
 	return ids[randi() % ids.size()]
+
+func _pick_random_imposter_peer_ids(count: int) -> Array[int]:
+	var ids: Array[int] = []
+	for k in Net.players.keys():
+		ids.append(int(k))
+	ids.shuffle()
+	var n: int = clamp(count, 1, ids.size())
+	var out: Array[int] = []
+	for i in range(n):
+		out.append(ids[i])
+	return out
 
 func _handle_player_join(packet: NetPacket) -> void:
 	var pd: Variant = packet.payload.get("player", null)

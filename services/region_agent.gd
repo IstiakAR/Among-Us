@@ -1,12 +1,8 @@
 extends SceneTree
 
-# Region VM agent (GDScript).
-# - Connects to matchmaker over TCP newline JSON.
-# - Registers a region + public IP.
-# - On alloc_room, picks a free port and spawns a dedicated room server process:
+
 #     Networking.x86_64 --headless --dedicated --port=PORT
-#
-# Run (using a Godot executable):
+
 #   godot4 --headless --script res://services_gd/region_agent.gd -- \
 #     --matchmaker-ip=127.0.0.1 --matchmaker-port=5000 \
 #     --region=na --public-ip=127.0.0.1 \

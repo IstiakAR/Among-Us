@@ -86,13 +86,15 @@ size = Vector2(30, 5)
 
 [node name="Player" type="CharacterBody2D"]
 script = ExtResource("1_v6fml")
+collision_layer = 1
+collision_mask = 5
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 material = SubResource("ShaderMaterial_mdl7e")
 position = Vector2(-0.62501526, 1.75)
 scale = Vector2(0.3945783, 0.38671872)
 sprite_frames = SubResource("SpriteFrames_khinc")
-animation = &"ghost"
+animation = &"stand"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0.75, 12)

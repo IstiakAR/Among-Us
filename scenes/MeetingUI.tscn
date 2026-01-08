@@ -32,6 +32,26 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_meet")
 
+[node name="TopBar" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 12.0
+offset_top = 10.0
+offset_right = -12.0
+grow_horizontal = 2
+
+[node name="Status" type="Label" parent="TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 22
+text = "Crew: 0 | Imp: 0"
+
+[node name="Close" type="Button" parent="TopBar"]
+layout_mode = 2
+text = "Close"
+
 [node name="DimBG" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = 15

@@ -8,6 +8,7 @@ class_name PlayerState
 @export var is_imposter: bool = false
 @export var is_alive: bool = true
 @export var position: Vector2 = Vector2.ZERO
+@export var completed_tasks: Array[String] = []
 
 func to_dict() -> Dictionary:
 	return {
@@ -19,6 +20,7 @@ func to_dict() -> Dictionary:
 		"is_alive": is_alive,
 		"x": position.x,
 		"y": position.y,
+		"completed_tasks": completed_tasks,
 	}
 
 static func from_dict(d: Dictionary) -> PlayerState:
@@ -32,4 +34,7 @@ static func from_dict(d: Dictionary) -> PlayerState:
 	p.is_imposter = bool(d.get("is_imposter", false))
 	p.is_alive = bool(d.get("is_alive", true))
 	p.position = Vector2(float(d.get("x", 0.0)), float(d.get("y", 0.0)))
+	var tasks: Variant = d.get("completed_tasks", [])
+	if typeof(tasks) == TYPE_ARRAY:
+		p.completed_tasks = tasks as Array[String]
 	return p

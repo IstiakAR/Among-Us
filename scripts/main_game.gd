@@ -11,6 +11,8 @@ var _player_scene: PackedScene = preload("res://scenes/Player.tscn")
 var _kill_cd_label: Label = null
 @onready var _report_button: TextureRect = $UI/HUD/ReportButton
 @onready var _meeting_ui: Control = $UI/MeetingUI
+@onready var _meeting_button: TextureRect = $MeetingButton
+@onready var _task_label: Label = $UI/HUD/TaskCountLabel
 
 var _avatars: Dictionary = {} # peer_id -> player node
 var _accum: float = 0.0
@@ -18,6 +20,7 @@ var _my_peer_id: int = 0
 
 var _kill_cooldown_seconds: float = 30.0
 var _kill_cooldown_remaining: float = 0.0
+var _result_shown: bool = false
 
 func _ready() -> void:
 	# Role is assigned in the lobby (host selects, everyone receives).
@@ -56,6 +59,10 @@ func _ready() -> void:
 	if is_instance_valid(_report_button):
 		_report_button.mouse_filter = Control.MOUSE_FILTER_STOP
 		_report_button.gui_input.connect(_on_report_button_input)
+	# Emergency meeting button in cafeteria
+	if is_instance_valid(_meeting_button):
+		_meeting_button.mouse_filter = Control.MOUSE_FILTER_STOP
+		_meeting_button.gui_input.connect(_on_meeting_button_input)
 
 	# Ensure HUD doesn't swallow clicks over fullscreen tasks.
 	var hud := get_node_or_null("UI/HUD")
@@ -131,6 +138,18 @@ func _physics_process(delta: float) -> void:
 		"y": pos.y,
 	})
 	Net.send_udp(pkt)
+
+	# Update HUD task counter for local player
+	if is_instance_valid(_task_label):
+		var required_tasks: Array[String] = ["download", "keypad", "circuit_match"]
+		var done := 0
+		if Net.players.has(_my_peer_id):
+			var pd: Dictionary = Net.players[_my_peer_id]
+			var tasks: Array = pd.get("completed_tasks", [])
+			for t in required_tasks:
+				if t in tasks:
+					done += 1
+		_task_label.text = "Tasks: %d/%d" % [done, required_tasks.size()]
 
 func _on_kill_button_input(event: InputEvent) -> void:
 	if not Globals.is_imposter:
@@ -209,6 +228,10 @@ func _on_tcp_packet(_from_peer_id: int, packet: NetPacket) -> void:
 			_handle_player_leave(packet)
 		PacketType.Type.PLAYER_KILL:
 			_handle_player_kill(packet)
+		PacketType.Type.TASK_COMPLETE:
+			_check_end_conditions()
+		PacketType.Type.END_GAME:
+			_handle_end_game(packet)
 		_:
 			pass
 
@@ -270,6 +293,15 @@ func _handle_player_join(packet: NetPacket) -> void:
 func _handle_player_leave(packet: NetPacket) -> void:
 	var peer_id := int(packet.payload.get("peer_id", 0))
 	_remove_avatar(peer_id)
+	# If an imposter leaves, crewmates win.
+	if Net.players.has(peer_id):
+		var pd: Dictionary = Net.players[peer_id]
+		var was_imposter := bool(pd.get("is_imposter", false))
+		Net.players.erase(peer_id)
+		if was_imposter:
+			_broadcast_end_game(false)
+			return
+	_check_end_conditions()
 
 func _on_peer_disconnected(peer_id: int) -> void:
 	_remove_avatar(peer_id)
@@ -342,6 +374,12 @@ func _handle_player_kill(packet: NetPacket) -> void:
 		if v != null and v.has_method("kill_player"):
 			v.call("kill_player")
 
+	# Mark victim not alive in players dictionary
+	if Net.players.has(victim_id):
+		var pd: Dictionary = Net.players[victim_id]
+		pd["is_alive"] = false
+		Net.players[victim_id] = pd
+
 	# Move killer to victim position if killer is known on this client
 	if killer_id == _my_peer_id:
 		if local_player is Node2D:
@@ -350,3 +388,77 @@ func _handle_player_kill(packet: NetPacket) -> void:
 		var k: Node = _avatars[killer_id]
 		if k is Node2D:
 			(k as Node2D).global_position = killer_pos
+
+	_check_end_conditions()
+
+func _on_meeting_button_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+			var pkt := NetPacket.new(PacketType.Type.MEETING_START, {"from_id": _my_peer_id})
+			Net.send(pkt)
+			if is_instance_valid(_meeting_ui) and _meeting_ui.has_method("open_meeting"):
+				_meeting_ui.call("open_meeting")
+
+func _check_end_conditions() -> void:
+	# Compute alive counts
+	var alive_imposters := 0
+	var alive_crewmates := 0
+	for k in Net.players.keys():
+		var pd: Dictionary = Net.players[int(k)]
+		var alive := bool(pd.get("is_alive", true))
+		if not alive:
+			continue
+		if bool(pd.get("is_imposter", false)):
+			alive_imposters += 1
+		else:
+			alive_crewmates += 1
+
+	# If no alive imposters, crewmates win
+	if alive_imposters <= 0:
+		_broadcast_end_game(false)
+		return
+	# If alive crewmates <= alive imposters, imposters win
+	if alive_crewmates <= alive_imposters:
+		_broadcast_end_game(true)
+		return
+
+	# Check team tasks completion: every crewmate completed all required tasks
+	var required_tasks: Array[String] = ["download", "keypad", "circuit_match"]
+	var all_crewmates_done := true
+	for k in Net.players.keys():
+		var pd: Dictionary = Net.players[int(k)]
+		var is_imp := bool(pd.get("is_imposter", false))
+		if is_imp:
+			continue
+		var tasks: Array = pd.get("completed_tasks", [])
+		for t in required_tasks:
+			if t not in tasks:
+				all_crewmates_done = false
+				break
+		if not all_crewmates_done:
+			break
+	if all_crewmates_done:
+		_broadcast_end_game(false)
+
+func _broadcast_end_game(imposter_won: bool) -> void:
+	# Only one source should broadcast; prefer host or dedicated decision-maker
+	var should_broadcast := (Net.mode == "host") or (Net.mode == "client" and not Net.players.has(1))
+	var pkt := NetPacket.new(PacketType.Type.END_GAME, {"imposter_won": imposter_won})
+	if should_broadcast:
+		Net.send(pkt)
+	# Always show locally; guard to avoid duplicate UI when relay arrives.
+	_handle_end_game(pkt)
+
+func _handle_end_game(packet: NetPacket) -> void:
+	if _result_shown:
+		return
+	var imposter_won := bool(packet.payload.get("imposter_won", false))
+	var result_scene: PackedScene = load("res://scenes/Result.tscn")
+	if result_scene != null:
+		var inst := result_scene.instantiate()
+		if inst is Control:
+			add_child(inst)
+			if inst.has_method("set_imposter_won"):
+				inst.call("set_imposter_won", imposter_won)
+			_result_shown = true

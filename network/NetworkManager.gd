@@ -33,7 +33,6 @@ signal rooms_listed(rooms)
 var server: GameServer
 var client: GameClient
 var lan: LanDiscovery
-var host_migration: HostMigrationManager
 var matchmaker: MatchmakerClient
 
 var mode: String = "offline"
@@ -49,7 +48,6 @@ func _ready() -> void:
 	server = GameServer.new()
 	client = GameClient.new()
 	lan = LanDiscovery.new()
-	host_migration = HostMigrationManager.new()
 	matchmaker = MatchmakerClient.new()
 	_apply_cmdline_overrides()
 	matchmaker.matchmaker_ip = matchmaker_ip
@@ -58,7 +56,6 @@ func _ready() -> void:
 	add_child(server)
 	add_child(client)
 	add_child(lan)
-	add_child(host_migration)
 	add_child(matchmaker)
 
 	server.peer_connected.connect(_on_server_peer_connected)
@@ -230,6 +227,8 @@ func send(packet: NetPacket, to_peer_id: int = -1) -> void:
 			server.send_to(to_peer_id, packet)
 		else:
 			server.broadcast(packet)
+			# Ensure host-local listeners also process this event.
+			emit_signal("packet_received", 1, packet)
 	elif mode == "client":
 		client.send(packet)
 
@@ -275,13 +274,29 @@ func _on_server_packet_received(from_peer_id: int, packet: NetPacket) -> void:
 		elif packet.type == PacketType.Type.MEETING_START:
 			# Relay meeting start to all clients so everyone opens the meeting.
 			server.broadcast(packet, from_peer_id)
+		elif packet.type == PacketType.Type.MEETING_END:
+			# Relay meeting end so clients can close meeting UI.
+			server.broadcast(packet, from_peer_id)
+		elif packet.type == PacketType.Type.END_GAME:
+			# Relay game over so all clients see the result screen (dedicated rooms).
+			server.broadcast(packet, from_peer_id)
 		elif packet.type == PacketType.Type.CHAT_MESSAGE or packet.type == PacketType.Type.VOTE:
 			# Relay chat and vote packets from a client to everyone else.
 			server.broadcast(packet, from_peer_id)
-		host_migration.handle_packet(packet)
+		elif packet.type == PacketType.Type.TASK_COMPLETE:
+			# Update host-side player record and relay to everyone else.
+			var pid := int(packet.payload.get("from_id", from_peer_id))
+			var task_id := str(packet.payload.get("task_id", ""))
+			if pid > 0 and players.has(pid) and task_id != "":
+				var pd: Dictionary = players[pid]
+				var arr: Array = pd.get("completed_tasks", [])
+				if task_id not in arr:
+					arr.append(task_id)
+					pd["completed_tasks"] = arr
+					players[pid] = pd
+			server.broadcast(packet, from_peer_id)
 		emit_signal("packet_received", from_peer_id, packet)
 		return
-	host_migration.handle_packet(packet)
 	emit_signal("packet_received", from_peer_id, packet)
 
 func _handle_host_hello(from_peer_id: int, packet: NetPacket) -> void:
@@ -389,7 +404,6 @@ func _on_client_connected() -> void:
 
 func _on_client_disconnected() -> void:
 	my_peer_id = 0
-	host_migration.on_host_disconnected()
 	emit_signal("disconnected")
 
 func _on_client_packet_received(packet: NetPacket) -> void:
@@ -411,7 +425,16 @@ func _on_client_packet_received(packet: NetPacket) -> void:
 		var peer_id := int(packet.payload.get("peer_id", 0))
 		if peer_id > 0 and players.has(peer_id):
 			players.erase(peer_id)
-	host_migration.handle_packet(packet)
+	elif packet.type == PacketType.Type.TASK_COMPLETE:
+		var pid := int(packet.payload.get("from_id", 0))
+		var task_id := str(packet.payload.get("task_id", ""))
+		if pid > 0 and players.has(pid) and task_id != "":
+			var pd: Dictionary = players[pid]
+			var arr: Array = pd.get("completed_tasks", [])
+			if task_id not in arr:
+				arr.append(task_id)
+				pd["completed_tasks"] = arr
+				players[pid] = pd
 	emit_signal("packet_received", client.server_peer_id, packet)
 
 func _register_host_player() -> void:
